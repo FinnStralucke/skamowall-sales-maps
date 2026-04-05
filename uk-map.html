@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkamoWall UK Lead Map</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --installer: #eb7a00;
+      --housing: #18864b;
+      --distributor: #2563eb;
+      --ink: #17202a;
+      --muted: #5f6c7b;
+      --line: #d7dee6;
+      --panel: #ffffff;
+      --bg: #eef3f6;
+      --a1: #ffc857;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #fff 0%, #f7f9fb 100%);
+      border-right: 1px solid var(--line);
+      padding: 20px 18px 16px;
+      overflow: auto;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--installer);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+    }
+
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f4f7fa; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .lead-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lead-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .lead-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+    }
+
+    .lead-item.active {
+      border-color: var(--installer);
+      box-shadow: 0 0 0 3px rgba(235, 122, 0, 0.14);
+    }
+
+    .lead-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rank {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.a1 {
+      background: rgba(255, 200, 87, 0.25);
+      color: #6f4c00;
+    }
+
+    .badge.a2 {
+      background: rgba(235, 122, 0, 0.12);
+      color: #8a4600;
+    }
+
+    .badge.b1 {
+      background: rgba(24, 134, 75, 0.12);
+      color: #15643a;
+    }
+
+    .badge.c1 {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+    }
+
+    .lead-name {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .lead-meta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    #map { height: 100vh; width: 100%; }
+
+    .map-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+
+    .leaflet-popup-content {
+      width: 300px;
+      margin: 12px 14px;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .popup-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .popup-meta {
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .popup-block {
+      margin-top: 8px;
+    }
+
+    .popup-block b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 11px;
+    }
+
+    @media (max-width: 960px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        max-height: 48vh;
+      }
+      #map {
+        height: 52vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="kicker">SkamoWall UK</div>
+      <h1>Lead Distribution Map</h1>
+      <p class="sub">UK prospect map built from the expanded lead sheet, with early-adopter installers ranked first and visually prioritised.</p>
+
+      <section class="card controls">
+        <strong>Layers</strong>
+        <div style="margin-top: 12px;">
+          <label><input type="checkbox" id="toggle-installers" checked> <span class="dot" style="background: var(--installer);"></span> Installers</label>
+          <label><input type="checkbox" id="toggle-housing" checked> <span class="dot" style="background: var(--housing);"></span> Housing associations</label>
+          <label><input type="checkbox" id="toggle-distributors" checked> <span class="dot" style="background: var(--distributor);"></span> Distributors</label>
+        </div>
+        <div class="buttons">
+          <button id="fit-all">Fit all</button>
+          <button id="fit-installers">Installers only</button>
+          <button id="fit-a1">Top early adopters</button>
+        </div>
+        <div class="map-note">Marker positions are approximate office or postcode centroids so you can judge geographic spread quickly. London points are intentionally separated by their actual office areas.</div>
+      </section>
+
+      <section class="card">
+        <strong>Snapshot</strong>
+        <div class="stats" style="margin-top: 12px;">
+          <div class="stat"><b id="stat-total">0</b><span>Visible leads</span></div>
+          <div class="stat"><b id="stat-a1">0</b><span>A1 installers</span></div>
+          <div class="stat"><b id="stat-installer">0</b><span>Installers</span></div>
+          <div class="stat"><b id="stat-other">0</b><span>Non-installers</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <strong>Leads</strong>
+        <div id="lead-list" class="lead-list" style="margin-top: 12px;"></div>
+      </section>
+    </aside>
+
+    <main id="map"></main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const leads = [{"priority":1,"tier":"A1 Top installer","group":"installer","category":"Installer / insulation specialist","name":"Kooka","region":"Wellingborough / London \u0026 South East","city":"Wellingborough","street":"7-11 Stewarts Road","postcode":"NN8 4RJ","email":"info@kooka.co.uk","phone":"01933 717129","website":"https://kooka.co.uk/","what":"Award-winning insulation and render contractor providing internal wall insulation, cavity wall extraction and insulation, loft insulation, plastering and drylining, with dedicated social-housing offerings.","reason":"One of the strongest early-adopter fits because it explicitly installs internal wall insulation, targets social housing, and still looks young and agile enough for pilot-led product adoption.","lat":52.292,"lng":-0.694},{"priority":2,"tier":"A1 Top installer","group":"installer","category":"Installer / retrofit contractor","name":"Pyramid Eco","region":"London / South East","city":"Jaywick","street":"Unit F03, Sunspot","postcode":"CO15 2JE","email":"info@pyramideco.co.uk","phone":"01255 615 777","website":"https://pyramideco.co.uk/","what":"PAS 2030-accredited retrofit company delivering insulation, ventilation, solar and heat-pump projects for homeowners, landlords, housing associations and local authorities across London and the South East.","reason":"Strong early adopter because it combines retrofit know-how, social-housing exposure, and ventilation plus mould capability in a practical London and South East footprint.","lat":51.777,"lng":1.097},{"priority":3,"tier":"A1 Top installer","group":"installer","category":"Installer / retrofit contractor","name":"Emit Zero","region":"London","city":"London","street":"620 Western Avenue","postcode":"W3 0TE","email":"","phone":"","website":"https://www.emitzero.co.uk/","what":"Retrofit-focused construction and energy-upgrade company offering internal wall insulation, external wall insulation, loft insulation, retrofit assessment and retrofit coordination services.","reason":"Strong early-adopter fit because it is a younger London company, visibly active in internal wall insulation and PAS 2035-style retrofit workflows, and looks well suited to pilot collaboration and technical onboarding.","lat":51.523,"lng":-0.277},{"priority":4,"tier":"A1 Top installer","group":"installer","category":"Installer / insulation specialist","name":"MRH Energy Solutions","region":"Blyth / nationwide","city":"Blyth","street":"Room 113, Blyth Business Enterprise Centre, Ridley Street","postcode":"NE24 3AG","email":"info@mrhenergysolutionsltd.co.uk","phone":"01670 209221","website":"https://mrhenergysolutionsltd.co.uk/","what":"Family-run heating and insulation installer delivering internal wall insulation, loft insulation, cavity wall insulation, room-in-roof insulation and related energy-efficiency upgrades.","reason":"Very good early-adopter candidate because it is family-run, established only in 2020, explicitly installs internal wall insulation, and presents itself as a practical, grant-aware execution partner rather than a slow-moving corporate contractor.","lat":55.126,"lng":-1.509},{"priority":5,"tier":"A1 Top installer","group":"installer","category":"Installer / insulation specialist","name":"RedExe","region":"Exeter / Devon / South West","city":"Exeter","street":"","postcode":"","email":"info@redexe.co.uk","phone":"07852 749130","website":"https://redexe.co.uk/","what":"Exeter-based retrofit and insulation installer delivering PAS 2030 internal wall insulation, underfloor insulation and room-in-roof insulation, with a practical whole-house fabric-upgrade profile.","reason":"Strong Exeter-region early-adopter fit because it is local, technically hands-on, explicitly active in internal wall insulation, and looks like the kind of agile specialist that can test a new wall system quickly.","lat":50.718,"lng":-3.533},{"priority":6,"tier":"A1 Top installer","group":"installer","category":"Installer / moisture specialist","name":"Environ Property Services","region":"London","city":"London","street":"Unit 12, Parson Green Depot, 33-39 Parsons Green Lane","postcode":"SW6 4HH","email":"service@environpropertyservices.co.uk","phone":"0203 935 1596","website":"https://environpropertyservices.co.uk/","what":"Family-owned London specialist in damp, mould, drainage, roofing and restoration, focused on diagnosing structural moisture problems and delivering remedial works.","reason":"Excellent trigger-case partner because many SkamoWall opportunities start with damp, condensation and mould. It is specialist, consultative and clearly positioned around diagnosis before treatment.","lat":51.474,"lng":-0.199},{"priority":7,"tier":"A1 Top installer","group":"installer","category":"Installer / insulation specialist","name":"Snug Home Insulations","region":"Hull / London / national social-housing retrofit","city":"Hull","street":"534-536 Hessle Road","postcode":"HU3 5BQ","email":"grants@snughomeinsulations.com","phone":"0800 593 0001","website":"https://www.snughomeinsulations.com/","what":"PAS 2030 retrofit installer covering internal wall insulation, external wall insulation, room-in-roof, loft insulation and renewable measures, with whole-house retrofit delivery.","reason":"Very strong because it explicitly installs internal wall insulation, is still relatively young, and shows enough social-housing and SHDF activity to support repeat pilots without being too corporate.","lat":53.738,"lng":-0.385},{"priority":8,"tier":"A1 Top installer","group":"installer","category":"Installer / retrofit contractor","name":"The Retrofit Company","region":"Exeter region / Devon \u0026 Cornwall","city":"Kelly Bray","street":"The Granary, Beeching Park","postcode":"PL17 8QS","email":"info@theretrofitcompany.co.uk","phone":"01822 661668","website":"https://www.theretrofitcompany.co.uk/","what":"Retrofit installer and building-performance specialist delivering internal wall insulation, airtightness, ventilation and fabric-first upgrade packages across the South West.","reason":"Very relevant first-mover candidate for the Exeter region because it combines internal wall insulation with ventilation and retrofit thinking, making it a strong technical partner for SkamoWall pilot projects.","lat":50.52,"lng":-4.242},{"priority":9,"tier":"A2 Secondary installer","group":"installer","category":"Installer / insulation specialist","name":"North East Insulation Services","region":"Sunderland / North East / UK-wide grants route","city":"Sunderland","street":"1 Charles St","postcode":"SR6 0AN","email":"enquiriesneis@gmail.com","phone":"0191 680 4575","website":"https://www.northeastinsulationservices.co.uk/","what":"Insulation and ventilation contractor covering internal wall insulation, loft insulation, room-in-roof insulation, cavity wall insulation and related home-efficiency upgrades.","reason":"A good early-adopter prospect because it is still relatively small, directly active in internal wall insulation and ventilation, and shows a practical local-installer profile that should be receptive to hands-on training and pilot work.","lat":54.921,"lng":-1.376},{"priority":10,"tier":"A2 Secondary installer","group":"installer","category":"Installer / retrofit contractor","name":"Cornerstone","region":"East Anglia / London / mainland England","city":"Harleston","street":"Units 2-4, Fuller Road","postcode":"IP20 9EA","email":"enquiries@cornerstonelimited.co.uk","phone":"01379 853 613","website":"https://www.cornerstonelimited.co.uk/","what":"Family business main contractor specialising in energy-efficiency measures and facade solutions for social landlords, local authorities, private landlords and homeowners.","reason":"Attractive early adopter because it is family-owned, technically credible, comfortable with direct delivery, and already active in social-housing retrofit and insulation-led projects.","lat":52.404,"lng":1.3},{"priority":11,"tier":"A2 Secondary installer","group":"installer","category":"Installer / moisture specialist","name":"Prokil","region":"South of England / London","city":"Bournemouth","street":"290 Holdenhurst Rd","postcode":"BH8 8AY","email":"enquiries@prokil.co.uk","phone":"01202 515566","website":"https://www.prokil.co.uk/","what":"Damp, timber-treatment and basement-waterproofing specialist with dedicated housing-association services and multiple branches across southern England and London.","reason":"Highly relevant because Prokil already works on the exact moisture and mould problems that can open the door to internal wall solutions, especially in housing-association stock.","lat":50.727,"lng":-1.849},{"priority":12,"tier":"A2 Secondary installer","group":"installer","category":"Installer / insulation specialist","name":"Therm-eco EWI Ltd","region":"Exeter / South West","city":"Exeter","street":"Unit 9 Vulcan Estate, Water Lane","postcode":"EX2 8BY","email":"info@therm-eco.net","phone":"01392 424898","website":"https://www.therm-eco.net/","what":"Exeter insulation contractor focused on external wall insulation, render systems and retrofit façade upgrades for residential and commercial buildings.","reason":"Relevant Exeter installer because it is clearly local and insulation-led, but ranked below the strongest SkamoWall fits because its public positioning is more external-wall focused than internal-wall or damp-led.","lat":50.714,"lng":-3.511},{"priority":13,"tier":"A2 Secondary installer","group":"installer","category":"Installer / retrofit contractor","name":"Mantis Energy","region":"Greater Manchester / London / national retrofit","city":"Wilmslow","street":"Wilmslow House","postcode":"SK9 5AG","email":"hello@mantisenergy.co.uk","phone":"01615 281 611","website":"https://mantisenergy.co.uk/","what":"Net-zero design and build company delivering decarbonisation, construction and building-upgrade projects across public sector, residential and social-housing settings.","reason":"Promising early adopter because it is newer, innovation-led and comfortable with retrofit and decarbonisation projects, although its site is less explicitly focused on internal wall insulation than the top names.","lat":53.328,"lng":-2.232},{"priority":14,"tier":"A2 Secondary installer","group":"installer","category":"Installer / insulation specialist","name":"The Wall Insulation Company","region":"Bristol / Bath","city":"Bristol","street":"3 Lambley Road","postcode":"BS5 8JQ","email":"info@wallinsulationcompany.co.uk","phone":"0117 290 0502","website":"https://wallinsulationcompany.co.uk/","what":"Specialist wall-insulation installer focused on internal and external wall insulation for solid-wall properties in Bristol and Bath, with a strong emphasis on maintaining period character.","reason":"Excellent early-adopter signal because it is a narrow specialist rather than a generic contractor, talks directly about internal wall insulation, and publishes educational content that suggests openness to new product-led conversations.","lat":51.464,"lng":-2.551},{"priority":15,"tier":"A2 Secondary installer","group":"installer","category":"Installer / retrofit contractor","name":"Zero Carbon Group","region":"Manchester / North West / North East / Yorkshire / Midlands","city":"Manchester","street":"9-21 Princess Street, Northern Assurance Buildings","postcode":"M2 4DN","email":"info@zerocarbongroup.co.uk","phone":"0161 706 0270","website":"https://www.zerocarbongroup.co.uk/","what":"Whole-house energy-efficiency and renewable-energy contractor delivering internal wall insulation, external wall insulation, loft insulation and other fabric-first retrofit measures for social housing and public-sector clients.","reason":"Relevant as a younger growth-stage retrofit company founded in 2019 with clear social-housing orientation, strong online visibility and direct capability in both internal and external wall insulation.","lat":53.48,"lng":-2.241},{"priority":16,"tier":"A2 Secondary installer","group":"installer","category":"Installer / social housing refurbishment contractor","name":"EWIS","region":"Hereford / Barnsley / Walsall / nationwide","city":"Hereford","street":"Energy House, Grandstand Road","postcode":"HR4 9NH","email":"info@ewis-ukltd.co.uk","phone":"0800 021 0044","website":"https://ewisuk.co.uk/","what":"Specialist insulation principal contractor focused on social-housing decarbonisation, SHDF delivery and solid-wall retrofit, with experience around both external and internal wall insulation.","reason":"A good second-wave early adopter because it is technically deep in solid-wall retrofit, visibly active online, and already set up for SHDF and housing-association delivery, even if it is more EWI-led than the top names.","lat":52.068,"lng":-2.747},{"priority":17,"tier":"A2 Secondary installer","group":"installer","category":"Installer / insulation specialist","name":"RJ Insulation","region":"Ipswich / nationwide","city":"Ipswich","street":"Units 3 \u0026 4 Handford Business Park, Hanford Cut","postcode":"IP1 2HD","email":"info@rjinsulation.co.uk","phone":"0800 804 4625","website":"https://rjinsulation.co.uk/","what":"National insulation installer with a local-friendly model, offering internal wall insulation, loft insulation and other sustainable insulation products with a consultative customer journey.","reason":"Early-adopter signal is good because RJ actively educates customers online, promotes sustainable materials, and presents a friendly installer-led model that should be open to testing and explaining new systems.","lat":52.054,"lng":1.14},{"priority":18,"tier":"A2 Secondary installer","group":"installer","category":"Installer / retrofit contractor","name":"Westdale","region":"Doncaster / Midlands / UK social housing retrofit","city":"Doncaster","street":"Doncaster Road, Askern","postcode":"DN6 9JD","email":"hello@westdale.uk","phone":"01302 700700","website":"https://westdale.uk/","what":"Whole-house refurbishment and decarbonisation contractor focused on social housing, with insulation, windows, doors, roofing and interior retrofit services.","reason":"Strong retrofit partner with clear social-housing experience and PAS2035 language, but slightly less ideal than the top group because the business looks more scaled and more EWI-heavy than IWI-led.","lat":53.617,"lng":-1},{"priority":19,"tier":"A2 Secondary installer","group":"installer","category":"Installer / social housing refurbishment contractor","name":"Breyer Group","region":"Romford / South and South East","city":"Romford","street":"Faringdon Avenue, Harold Hill","postcode":"RM3 8ST","email":"info@breyergroup.co.uk","phone":"020 3780 6355","website":"https://www.breyergroup.co.uk/","what":"Family-owned property services provider for roofing, repairs, refurbishment, retrofit and decarbonisation projects in the South and South East public sector and social-housing market.","reason":"Commercially strong route into housing providers and retrofit programmes, but ranked below the top names because it appears larger and less purely IWI-led than the more specialist early-adopter contractors.","lat":51.601,"lng":0.233},{"priority":20,"tier":"A2 Secondary installer","group":"installer","category":"Installer / social housing refurbishment contractor","name":"Mulalley","region":"Woodford Green / London \u0026 South East","city":"Woodford Green","street":"Teresa Gavin House, Woodford Avenue","postcode":"IG8 8FA","email":"enquiries@mulalley.co.uk","phone":"020 8551 9999","website":"https://www.mulalley.co.uk/","what":"Private family-owned contractor delivering planned maintenance, refurbishment, regeneration and social-housing improvement work across London and the South East.","reason":"Strategically useful because it is family-owned, deeply embedded in social housing and large enough to scale if SkamoWall gains traction, but not as pilot-agile as the higher-ranked specialists.","lat":51.607,"lng":0.034},{"priority":21,"tier":"A2 Secondary installer","group":"installer","category":"Installer / social housing refurbishment contractor","name":"Westville Group","region":"Derbyshire / Midlands / Yorkshire / UK-wide retrofit","city":"Shirebrook","street":"Unit 2, New Brook Business Park, Weighbridge Road","postcode":"NG20 8GB","email":"contact@westvillegroup.co.uk","phone":"0800 158 3605","website":"https://www.westvillegroup.co.uk/","what":"Long-established insulation and regeneration contractor covering external and internal wall insulation, cavity wall insulation, loft insulation and retrofit support for local-authority and residential projects.","reason":"Not a pure first-wave early adopter, but still worth adding because it has deep solid-wall experience, talks openly about fabric-first retrofit, and could become a credible scale-up installer after first market validation.","lat":53.202,"lng":-1.202},{"priority":22,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Octavia","region":"Central and West London","city":"London","street":"Emily House, 202-208 Kensal Road","postcode":"W10 5BN","email":"info@octavia.org.uk","phone":"0300 123 1567","website":"https://www.octavia.org.uk/","what":"Housing provider focused on homes, support and care in central and West London, with a long history in older, high-value urban stock where internal solutions can be relevant.","reason":"Best housing-association fit in this list because it is London-based, smaller than the national giants, and its stock profile makes internal insulation and damp-response solutions commercially plausible.","lat":51.53,"lng":-0.223},{"priority":23,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"LiveWest","region":"South West","city":"Exeter","street":"1 Wellington Way","postcode":"EX5 2FZ","email":"","phone":"0300 123 8080","website":"https://www.livewest.co.uk/","what":"Large South West housing association managing homes across Devon, Cornwall and Somerset with active damp-and-mould and stock-investment programmes.","reason":"Good SkamoWall target because it gives South West geographic coverage, has clear damp-and-mould relevance, and operates at the scale where repeatable internal-wall solutions can matter.","lat":50.729,"lng":-3.45},{"priority":24,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Coastline Housing","region":"Cornwall / South West","city":"Pool, Redruth","street":"Coastline House, 4 Barncoose Gateway Park","postcode":"TR15 3RQ","email":"customer.service@coastlinehousing.co.uk","phone":"01209 200200","website":"https://www.coastlinehousing.co.uk/","what":"Cornwall housing association with asset-management, repair and damp-and-mould responsibilities across its homes, plus a visible sustainability and performance agenda.","reason":"Useful South West housing prospect because it extends the map beyond London, has direct damp-and-mould relevance, and is regionally concentrated enough for targeted pilots.","lat":50.231,"lng":-5.246},{"priority":25,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Karbon Homes","region":"North East","city":"Newcastle upon Tyne","street":"Number Five, Gosforth Park Avenue, Gosforth Business Park","postcode":"NE12 8EG","email":"info@karbonhomes.co.uk","phone":"0808 164 0111","website":"https://www.karbonhomes.co.uk/","what":"Major North East housing association with repairs, planned investment and a visible programme around damp, mould and healthy homes.","reason":"Good northern housing target because it materially improves UK spread and has an explicit damp-and-mould agenda that fits the SkamoWall problem set.","lat":55.017,"lng":-1.614},{"priority":26,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Midland Heart","region":"West Midlands","city":"Birmingham","street":"20 Bath Row","postcode":"B15 1LZ","email":"","phone":"0345 60 20 540","website":"https://www.midlandheart.org.uk/","what":"Large Midlands housing association with asset management, retrofit pressure, tenant repair obligations and published damp-and-mould processes.","reason":"Useful Midlands housing target because it broadens regional coverage and clearly operates in the damp, mould and retrofit problem space relevant for SkamoWall.","lat":52.472,"lng":-1.909},{"priority":27,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Southern Housing","region":"London / South East / Midlands","city":"London","street":"59-61 Clerkenwell Road","postcode":"EC1M 5LA","email":"hello@southernhousing.org.uk","phone":"0300 303 1066","website":"https://www.southernhousing.org.uk/","what":"Large housing provider with around 80,000 homes across London, the South East, the Isle of Wight and the Midlands, investing in existing homes and resident services.","reason":"High-value strategic account because of its scale, London and South East stock, and current investment in existing homes, though it is less likely to move as quickly as a smaller association.","lat":51.522,"lng":-0.103},{"priority":28,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Clarion Housing Group","region":"United Kingdom / strong London base","city":"London","street":"5th Floor, Greater London House, Hampstead Road","postcode":"NW1 7QX","email":"","phone":"","website":"https://www.clarionhg.com/","what":"The UK\u0027s largest housing association, managing more than 125,000 homes and investing heavily in existing homes, urgent damp cases and sustainability.","reason":"A strategic scale account for SkamoWall because Clarion has a very large older stock base, clear sustainability ambition and a stated operational focus on urgent damp cases.","lat":51.528,"lng":-0.138},{"priority":29,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Notting Hill Genesis","region":"London","city":"London","street":"Bruce Kenrick House, 2 Killick Street","postcode":"N1 9FL","email":"info@nhg.org.uk","phone":"020 3815 0000","website":"https://www.nhg.org.uk/","what":"Large London housing association and developer with more than 60,000 homes, focused on improving existing homes and resident experience across the capital.","reason":"Relevant because its London stock profile, scale and investment plans make it a serious route for damp, comfort and retrofit solutions, even if the organisation is less agile than smaller associations.","lat":51.537,"lng":-0.111},{"priority":30,"tier":"B1 Housing association","group":"housing","category":"Housing association","name":"Wandle Housing Association","region":"South London","city":"London","street":"Second Floor, 230 Blackfriars Road","postcode":"SE1 8NW","email":"customerservices@wandle.com","phone":"0300 2000 120","website":"https://www.wandle.com/","what":"South London housing association with more than 7,000 homes, a resident-facing damp and mould programme and continued investment in existing stock and services.","reason":"A good medium-sized target because it is large enough to matter, focused on South London stock, and publicly communicates an active damp and mould improvement agenda.","lat":51.5,"lng":-0.104},{"priority":31,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"The Yard Builders Merchant","region":"London / nationwide delivery","city":"Harrow","street":"First Floor, 10 College Rd","postcode":"HA1 1BE","email":"sales@theyardbm.co.uk","phone":"07902 952 591","website":"https://theyardbm.co.uk/","what":"Growing family-run builders merchant focused on plasterboard, insulation and sheet materials, serving tradespeople, homeowners and developers across the UK.","reason":"Best early-adopter merchant in this group because it is smaller, insulation-led, easy to reach and clearly trying to grow, which makes it more open to new products than the big chains.","lat":51.581,"lng":-0.335},{"priority":32,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"SIG Insulation \u0026 Dry Lining Southwark","region":"London","city":"Southwark","street":"Unit 6, Bricklayers Arms Distribution Centre, Mandela Way","postcode":"SE1 5SR","email":"southwark@siginsulationanddrylining.com","phone":"020 7064 4900","website":"https://mcprod.sigdistribution.co.uk/branch-finder/","what":"Specialist distributor of insulation, drywall and related interior building products, with multiple London branches and a strong installer-facing model.","reason":"A strong strategic distributor because it is specialist rather than generalist, already sells insulation-led systems, and gives SkamoWall a route into professional drylining and insulation buyers.","lat":51.494,"lng":-0.077},{"priority":33,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"Encon Insulation \u0026 Nevill Long","region":"United Kingdom / head office Wetherby","city":"Wetherby","street":"Brunswick House, 1 Deighton Close","postcode":"LS22 7GZ","email":"info@encon.co.uk","phone":"01937 524 200","website":"https://www.encon.co.uk/","what":"Independent specialist distributor of insulation, interior systems, fire protection and technical solutions, with national trade and project-support capability.","reason":"High-value route-to-market because Encon already lives in the insulation ecosystem and can support both branch sales and project-led specification conversations.","lat":53.925,"lng":-1.388},{"priority":34,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"CCF Wandsworth","region":"London","city":"Wandsworth","street":"54-66 Portslade Road","postcode":"SW8 3DH","email":"ccfwandsworth@ccfltd.co.uk","phone":"020 7622 1022","website":"https://www.ccfltd.co.uk/","what":"Nationwide distributor of insulation, drylining, ceilings and interior building products, with dedicated London branches serving trade and contractor buyers.","reason":"A strong distributor target because CCF is highly relevant to the drylining and insulation trade, though it is a bigger and more process-driven channel than the top merchant choice.","lat":51.476,"lng":-0.136},{"priority":35,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"Jewson Lambeth","region":"London","city":"Lambeth","street":"6/12 Kennington Lane","postcode":"SE11 4LT","email":"branch0546@jewson.co.uk","phone":"0207 735 1251","website":"https://www.jewson.co.uk/","what":"National builders merchant serving contractors with building materials, including wall insulation products and branch-level trade support.","reason":"Useful as a broad market-access route to everyday contractors, but ranked behind the more specialist distributors because Jewson is less insulation-specific.","lat":51.486,"lng":-0.11},{"priority":36,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"SIG Insulation \u0026 Dry Lining Manchester","region":"North West","city":"Manchester","street":"Unit 1, Trafford Point 1, Stretford","postcode":"M17 1SH","email":"manchester@siginsulationanddrylining.com","phone":"0161 836 4400","website":"https://mcprod.sigdistribution.co.uk/branch-finder/manchester/","what":"Specialist insulation and drylining merchant branch serving Greater Manchester and the wider North West trade market.","reason":"Good non-London distributor addition because it widens installer access in the North West through a specialist insulation merchant footprint.","lat":53.463,"lng":-2.307},{"priority":37,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"Encon Insulation \u0026 Nevill Long Bristol","region":"South West","city":"Bristol","street":"Units 1-4 Century Park, Chittening Industrial Estate, Avonmouth","postcode":"BS11 0YB","email":"bristol@encon.co.uk","phone":"0117 980 2100","website":"https://www.encon.co.uk/about/branch-locator/encon-insulation-and-nevill-long-bristol","what":"Specialist insulation, interiors and building-envelope merchant branch serving Bristol and the South West installer network.","reason":"Useful South West merchant access point because it supports installer reach outside London and lines up well with fabric and insulation trades relevant for SkamoWall.","lat":51.512,"lng":-2.685},{"priority":38,"tier":"C1 Distributor","group":"distributor","category":"Distributor / merchant","name":"CCF East Kilbride","region":"Scotland","city":"East Kilbride","street":"Law Place, Nerston Mains","postcode":"G74 4QL","email":"ccfeastkilbride@ccfltd.co.uk","phone":"01355 244400","website":"https://www.ccfltd.co.uk/branch-locator/1170","what":"Interior building products and drylining merchant branch serving central Scotland installers and contractors.","reason":"Good Scotland distribution point because it expands map coverage materially and connects SkamoWall to a different installer ecosystem beyond England.","lat":55.779,"lng":-4.167}];
+    const colors = {
+      installer: '#eb7a00',
+      housing: '#18864b',
+      distributor: '#2563eb',
+      other: '#64748b'
+    };
+
+    const state = {
+      installer: true,
+      housing: true,
+      distributor: true
+    };
+
+    const map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
+
+    const layers = {
+      installer: L.layerGroup().addTo(map),
+      housing: L.layerGroup().addTo(map),
+      distributor: L.layerGroup().addTo(map)
+    };
+
+    const leadList = document.getElementById('lead-list');
+    let activeName = null;
+
+    function badgeClass(tier) {
+      if (tier.startsWith('A1')) return 'a1';
+      if (tier.startsWith('A2')) return 'a2';
+      if (tier.startsWith('B1')) return 'b1';
+      return 'c1';
+    }
+
+    function markerRadius(lead) {
+      if (lead.tier.startsWith('A1')) return 10;
+      if (lead.group === 'installer') return 8;
+      return 7;
+    }
+
+    function popupHtml(lead) {
+      const contact = [lead.street, lead.postcode + ' ' + lead.city].filter(Boolean).join(', ');
+      const email = lead.email ? '<div><b>Email</b><a href="mailto:' + lead.email + '">' + lead.email + '</a></div>' : '';
+      const phone = lead.phone ? '<div><b>Phone</b>' + lead.phone + '</div>' : '';
+
+      return [
+        '<div class="popup-title">' + lead.priority + '. ' + lead.name + '</div>',
+        '<div class="popup-meta">' + lead.tier + ' | ' + lead.category + '</div>',
+        '<div class="popup-block"><b>Region</b>' + lead.region + '</div>',
+        '<div class="popup-block"><b>Address</b>' + contact + '</div>',
+        email,
+        phone,
+        '<div class="popup-block"><b>Website</b><a href="' + lead.website + '" target="_blank" rel="noreferrer">' + lead.website + '</a></div>',
+        '<div class="popup-block"><b>What they do</b>' + lead.what + '</div>',
+        '<div class="popup-block"><b>Why prioritised</b>' + lead.reason + '</div>'
+      ].join('');
+    }
+
+    function visibleLeads() {
+      return leads.filter((lead) => state[lead.group]);
+    }
+
+    function renderMarkers() {
+      Object.values(layers).forEach((layer) => layer.clearLayers());
+      const bounds = [];
+
+      visibleLeads().forEach((lead) => {
+        const marker = L.circleMarker([lead.lat, lead.lng], {
+          radius: markerRadius(lead),
+          color: lead.tier.startsWith('A1') ? '#6f4c00' : colors[lead.group],
+          weight: lead.tier.startsWith('A1') ? 3 : 2,
+          fillColor: lead.tier.startsWith('A1') ? '#ffc857' : colors[lead.group],
+          fillOpacity: 0.8
+        });
+
+        marker.bindPopup(popupHtml(lead));
+        marker.on('click', () => {
+          activeName = lead.name;
+          renderList();
+        });
+
+        marker.addTo(layers[lead.group]);
+        bounds.push([lead.lat, lead.lng]);
+      });
+
+      if (bounds.length) {
+        map.fitBounds(bounds, { padding: [36, 36] });
+      } else {
+        map.setView([54.2, -2.7], 6);
+      }
+    }
+
+    function renderStats() {
+      const visible = visibleLeads();
+      const installerCount = visible.filter((lead) => lead.group === 'installer').length;
+      const a1Count = visible.filter((lead) => lead.tier.startsWith('A1')).length;
+      document.getElementById('stat-total').textContent = visible.length;
+      document.getElementById('stat-a1').textContent = a1Count;
+      document.getElementById('stat-installer').textContent = installerCount;
+      document.getElementById('stat-other').textContent = visible.length - installerCount;
+    }
+
+    function renderList() {
+      const visible = visibleLeads();
+      leadList.innerHTML = '';
+
+      visible.forEach((lead) => {
+        const item = document.createElement('div');
+        item.className = 'lead-item' + (activeName === lead.name ? ' active' : '');
+        item.innerHTML = [
+          '<div class="lead-top">',
+          '<div class="rank">#' + lead.priority + '</div>',
+          '<div class="badge ' + badgeClass(lead.tier) + '">' + lead.tier + '</div>',
+          '</div>',
+          '<div class="lead-name">' + lead.name + '</div>',
+          '<div class="lead-meta">' + lead.category + '<br>' + lead.city + ', ' + lead.region + '</div>'
+        ].join('');
+
+        item.addEventListener('click', () => {
+          activeName = lead.name;
+          map.flyTo([lead.lat, lead.lng], lead.group === 'installer' ? 8 : 9, { duration: 0.45 });
+          renderList();
+
+          setTimeout(() => {
+            const layer = Object.values(layers).find((groupLayer) => {
+              let found = null;
+              groupLayer.eachLayer((layer) => {
+                const ll = layer.getLatLng();
+                if (Math.abs(ll.lat - lead.lat) < 0.0001 && Math.abs(ll.lng - lead.lng) < 0.0001) {
+                  found = layer;
+                }
+              });
+              if (found) {
+                found.openPopup();
+                return true;
+              }
+              return false;
+            });
+          }, 140);
+        });
+
+        leadList.appendChild(item);
+      });
+    }
+
+    function rerender() {
+      renderMarkers();
+      renderStats();
+      renderList();
+    }
+
+    document.getElementById('toggle-installers').addEventListener('change', (event) => {
+      state.installer = event.target.checked;
+      rerender();
+    });
+
+    document.getElementById('toggle-housing').addEventListener('change', (event) => {
+      state.housing = event.target.checked;
+      rerender();
+    });
+
+    document.getElementById('toggle-distributors').addEventListener('change', (event) => {
+      state.distributor = event.target.checked;
+      rerender();
+    });
+
+    document.getElementById('fit-all').addEventListener('click', () => {
+      const bounds = visibleLeads().map((lead) => [lead.lat, lead.lng]);
+      if (bounds.length) map.fitBounds(bounds, { padding: [36, 36] });
+    });
+
+    document.getElementById('fit-installers').addEventListener('click', () => {
+      const bounds = visibleLeads().filter((lead) => lead.group === 'installer').map((lead) => [lead.lat, lead.lng]);
+      if (bounds.length) map.fitBounds(bounds, { padding: [36, 36] });
+    });
+
+    document.getElementById('fit-a1').addEventListener('click', () => {
+      const bounds = visibleLeads().filter((lead) => lead.tier.startsWith('A1')).map((lead) => [lead.lat, lead.lng]);
+      if (bounds.length) map.fitBounds(bounds, { padding: [48, 48] });
+    });
+
+    rerender();
+  </script>
+</body>
+</html>

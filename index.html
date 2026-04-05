@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkamoWall Sales Maps</title>
+  <style>
+    :root {
+      --orange: #eb7a00;
+      --green: #18864b;
+      --ink: #17202a;
+      --muted: #5f6c7b;
+      --line: #d7dee6;
+      --bg: linear-gradient(180deg, #fff7ef 0%, #eef3f6 100%);
+      --panel: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 56px 20px 72px;
+    }
+
+    .kicker {
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 40px;
+      line-height: 1.05;
+    }
+
+    .intro {
+      max-width: 720px;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .tag.uk {
+      background: rgba(235, 122, 0, 0.12);
+      color: #8a4600;
+    }
+
+    .tag.nl {
+      background: rgba(24, 134, 75, 0.12);
+      color: #15643a;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    a.button {
+      display: inline-block;
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    a.button.primary {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
+    .footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="kicker">SkamoWall</div>
+    <h1>Sales Map Hub</h1>
+    <div class="intro">
+      Direct web access to the interactive SkamoWall lead maps for the United Kingdom and the Amsterdam-region Netherlands market.
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="tag uk">United Kingdom</div>
+        <h2>UK Priority Map</h2>
+        <p>Installer-heavy prospect map with housing associations and distributors layered around the strongest early-adopter targets.</p>
+        <div class="actions">
+          <a class="button primary" href="./uk-map.html">Open UK Map</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tag nl">Netherlands</div>
+        <h2>Amsterdam Focus Map</h2>
+        <p>Amsterdam-region lead map with installers, housing associations and distributors presented in the same interactive format.</p>
+        <div class="actions">
+          <a class="button primary" href="./amsterdam-map.html">Open NL Map</a>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      Published via GitHub Pages for simple browser access and easy sharing.
+    </div>
+  </main>
+</body>
+</html>

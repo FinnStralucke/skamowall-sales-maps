@@ -1,0 +1,485 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkamoWall Netherlands Lead Map</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --installer: #eb7a00;
+      --housing: #18864b;
+      --distributor: #2563eb;
+      --ink: #17202a;
+      --muted: #5f6c7b;
+      --line: #d7dee6;
+      --panel: #ffffff;
+      --bg: #eef3f6;
+      --direct-fit: #8a4600;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #fff 0%, #f7f9fb 100%);
+      border-right: 1px solid var(--line);
+      padding: 20px 18px 16px;
+      overflow: auto;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--installer);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+    }
+
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f4f7fa; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .lead-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lead-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .lead-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+    }
+
+    .lead-item.active {
+      border-color: var(--installer);
+      box-shadow: 0 0 0 3px rgba(235, 122, 0, 0.14);
+    }
+
+    .lead-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rank {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.installer {
+      background: rgba(235, 122, 0, 0.12);
+      color: #8a4600;
+    }
+
+    .badge.housing {
+      background: rgba(24, 134, 75, 0.12);
+      color: #15643a;
+    }
+
+    .badge.distributor {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+    }
+
+    .lead-name {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .lead-meta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    #map { height: 100vh; width: 100%; }
+
+    .map-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+
+    .leaflet-popup-content {
+      width: 300px;
+      margin: 12px 14px;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .popup-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .popup-meta {
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .popup-block {
+      margin-top: 8px;
+    }
+
+    .popup-block b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 11px;
+    }
+
+    @media (max-width: 960px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        max-height: 48vh;
+      }
+      #map {
+        height: 52vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="kicker">SkamoWall NL</div>
+      <h1>Lead Distribution Map</h1>
+      <p class="sub">Amsterdam-region prospect map built from the Netherlands focus sheet, with installers kept in the lead and supporting housing associations and distributors layered around them.</p>
+
+      <section class="card controls">
+        <strong>Layers</strong>
+        <div style="margin-top: 12px;">
+          <label><input type="checkbox" id="toggle-installers" checked> <span class="dot" style="background: var(--installer);"></span> Installers</label>
+          <label><input type="checkbox" id="toggle-housing" checked> <span class="dot" style="background: var(--housing);"></span> Housing associations</label>
+          <label><input type="checkbox" id="toggle-distributors" checked> <span class="dot" style="background: var(--distributor);"></span> Distributors</label>
+        </div>
+        <div class="buttons">
+          <button id="fit-all">Fit all</button>
+          <button id="fit-installers">Installers only</button>
+          <button id="reset-core">Amsterdam focus</button>
+        </div>
+        <div class="map-note">Marker positions are approximate office or postcode centroids so you can judge clustering and local coverage quickly across Amsterdam and the wider ring.</div>
+      </section>
+
+      <section class="card">
+        <strong>Snapshot</strong>
+        <div class="stats" style="margin-top: 12px;">
+          <div class="stat"><b id="stat-total">0</b><span>Visible leads</span></div>
+          <div class="stat"><b id="stat-installer">0</b><span>Installers</span></div>
+          <div class="stat"><b id="stat-housing">0</b><span>Housing</span></div>
+          <div class="stat"><b id="stat-distributor">0</b><span>Distributors</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <strong>Leads</strong>
+        <div id="lead-list" class="lead-list" style="margin-top: 12px;"></div>
+      </section>
+    </aside>
+
+    <main id="map"></main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const leads = [{"order":1,"group":"installer","category":"Installer / maintenance contractor","name":"Amstel Renovatie \u0026 Bouw","region":"Amsterdam-East","city":"Amsterdam","street":"Julianaplein 8D","postcode":"1097 DN","email":"info@amstelrenovatie.nl","phone":"06 48 44 77 02","website":"https://www.amstelrenovatie.nl/","what":"Local renovation contractor for renovations, extensions, restorations and periodic maintenance projects in Amsterdam and the surrounding area.","reason":"Useful as a smaller local execution partner for pilot projects, apartment renovations and smaller renovation jobs in occupied urban housing stock.","lat":52.346,"lng":4.918},{"order":2,"group":"installer","category":"Installer / maintenance contractor","name":"Coen Hagedoorn Amsterdam West","region":"Amsterdam-West / Westpoort","city":"Amsterdam","street":"Elementenstraat 24","postcode":"1014 AR","email":"amsterdam@coenhagedoorn.nl","phone":"088 880 80 05","website":"https://coenhagedoorn.nl/","what":"Renovation and maintenance contractor focused on day-to-day maintenance, void-turnover maintenance, planned maintenance and sustainability upgrades for housing associations.","reason":"Strong Amsterdam fit because the local branch explicitly serves housing associations and works on void-turnover and planned maintenance.","lat":52.398,"lng":4.827},{"order":3,"group":"installer","category":"Installer / maintenance contractor","name":"De Waard Bouw","region":"Amsterdam-Noord","city":"Amsterdam","street":"Internetstraat 15","postcode":"1033 MS","email":"info@dewaardbouw.nl","phone":"020 636 1614","website":"https://www.dewaardbouw.nl/","what":"Amsterdam contractor focused on renovation, restoration, daily maintenance, foundations, cellars and shop/building conversions.","reason":"Interesting as a smaller local contractor with daily maintenance capability and renovation/restoration experience that fits older Amsterdam building stock.","lat":52.403,"lng":4.883},{"order":4,"group":"installer","category":"Installer / maintenance contractor","name":"elk Amsterdam","region":"Amsterdam-Zuidoost","city":"Amsterdam","street":"Keienbergweg 50 C-D","postcode":"1101 GC","email":"amsterdam@elk.nl","phone":"088 225 85 00","website":"https://www.elk.nl/","what":"Maintenance and renovation specialist for housing associations, offering major maintenance, planned maintenance, void-turnover maintenance, restoration and resident-focused renovation.","reason":"Strong local contractor in Amsterdam with clear housing-association project references and an explicit focus on maintenance and renovation in existing housing stock.","lat":52.307,"lng":4.946},{"order":5,"group":"installer","category":"Installer / maintenance contractor","name":"EtroHuipen Vastgoedzorg","region":"Wormerveer / Zaanstreek","city":"Wormerveer","street":"Handelsweg 15","postcode":"1521 NH","email":"info@etrovastgoedzorg.nl","phone":"088 000 49 00","website":"https://wijzijnetro.nl/","what":"Property-maintenance specialist focused on renovation, sustainability upgrades and maintenance of existing real estate across North Holland, Flevoland and Utrecht.","reason":"Relevant for the Amsterdam ring because it operates regionally and fits housing-association and sustainability work in Zaanstreek and the northern edge of the metro region.","lat":52.491,"lng":4.79},{"order":6,"group":"installer","category":"Installer / maintenance contractor","name":"FixEnjoy Bouw B.V.","region":"Amsterdam-West","city":"Amsterdam","street":"Jan Pieter Heijestraat 77A","postcode":"1053 GM","email":"info@fixenjoybouwservice.nl","phone":"06 16 79 99 29","website":"https://fixenjoybouwservice.nl/","what":"Amsterdam full-service renovation contractor for homes and business premises, covering demolition, fit-out, installations, carpentry and renovation works.","reason":"Interesting as a smaller Amsterdam firm with a broad renovation skill set and good fit for practical pilot execution and follow-up works.","lat":52.365,"lng":4.865},{"order":7,"group":"installer","category":"Installer / maintenance contractor","name":"GE-Amsterdam Bouw","region":"Weesp / Amsterdam-East","city":"Weesp","street":"Bloemendalerweg 43A","postcode":"1382 KB","email":"info@ge-amsterdam.nl","phone":"0294 785 469 / 06 184 10 301","website":"https://www.ge-amsterdam.nl/","what":"Builder and renovation contractor covering housing renovation, renovation and maintenance, utility projects, permits and drawings, facade repairs, roof works, crawl-space moisture issues and insulation board installation.","reason":"Interesting as a smaller Weesp-based contractor with a broad repair-and-renovation scope that matches Amsterdam-East, Weesp and Diemen projects, including moisture and insulation-adjacent work.","lat":52.302,"lng":5.039},{"order":8,"group":"installer","category":"Installer / maintenance contractor","name":"HEMUBO","region":"Almere / Amsterdam region","city":"Almere","street":"Damsluisweg 1","postcode":"1332 EA","email":"info@hemubo.nl","phone":"036 549 27 00","website":"https://www.hemubo.nl/","what":"Multidisciplinary organization for strategic renovation and maintenance of real estate, with capabilities in construction, service and void-turnover work, painting, asbestos removal, installation work, concrete and facade technology.","reason":"One of the strongest contractors for SkamoWall use cases in existing housing stock, including cold-wall, damp, mould and housing-association renovation projects around Amsterdam.","lat":52.372,"lng":5.22},{"order":9,"group":"installer","category":"Installer / maintenance contractor","name":"Hillen \u0026 Roosen","region":"Amsterdam","city":"Amsterdam","street":"Mensinge 78","postcode":"1083 HG","email":"info@hillen-roosen.nl","phone":"020 541 95 41","website":"https://hillen-roosen.nl/","what":"Construction and renovation company for complex urban housing and renovation projects in the metropolitan region.","reason":"Secondary but still relevant lead because of its Amsterdam location, urban project experience and connection to the HEMUBO group.","lat":52.334,"lng":4.879},{"order":10,"group":"installer","category":"Installer / maintenance contractor","name":"Logchies Renovatie en Onderhoud","region":"Amsterdam / Beverwijk","city":"Amsterdam","street":"Contactweg 64","postcode":"1014 BW","email":"info@logchies.nl","phone":"0251 264 000","website":"https://www.logchies.nl/","what":"Renovation and maintenance partner for existing real estate, focused on day-to-day maintenance, renovation and home-improvement work across North Holland.","reason":"Relevant for Amsterdam and the western ring because Logchies is locally present and active in the maintenance and improvement of existing housing stock.","lat":52.393,"lng":4.838},{"order":11,"group":"installer","category":"Installer / maintenance contractor","name":"Ooijevaar | Onderhoud PLUS Amsterdam","region":"Amsterdam-West / Westpoort","city":"Amsterdam","street":"Moezelhavenweg 85 - 87 - 89","postcode":"1043 AM","email":"onderhoud@ooijevaar.nl","phone":"088 19 56 000","website":"https://bevlogenbouwers.nl/","what":"Renovation and maintenance contractor focused on planned maintenance, renovation and sustainability upgrades for professional clients.","reason":"Relevant as an Amsterdam maintenance partner for housing-association work and repeat improvement projects in existing homes.","lat":52.4,"lng":4.807},{"order":12,"group":"installer","category":"Installer / maintenance contractor","name":"PCS Totaal Services","region":"Amsterdam-East / Cruquius","city":"Amsterdam","street":"Cruquiusweg 96V","postcode":"1019 AJ","email":"info@pcstotaal.nl","phone":"020 693 0699","website":"https://www.pcstotaal.nl/","what":"Full-service contractor and property-maintenance provider for renovation, repairs, installation work, plumbing and maintenance support for property managers.","reason":"Interesting as a smaller regional contractor with a direct property-maintenance route into Amsterdam portfolio managers and a one-contact model for ongoing works.","lat":52.377,"lng":4.947},{"order":13,"group":"installer","category":"Installer / maintenance contractor","name":"Richel Bouw","region":"Amsterdam-Zuid","city":"Amsterdam","street":"Vlietstraat 150A","postcode":"1075 VE","email":"info@richel.org","phone":"06 15886768","website":"https://richelbouw.nl/","what":"Small Amsterdam contractor handling renovations, carpentry, VvE maintenance and B2B renovation work for shops, offices and other commercial spaces.","reason":"Interesting because it is a clearly smaller Amsterdam-based contractor with direct VvE and maintenance access and practical fit for smaller retrofit pilots.","lat":52.352,"lng":4.867},{"order":14,"group":"installer","category":"Installer / maintenance contractor","name":"SEKU Bouw","region":"Volendam / Amsterdam region","city":"Volendam","street":"Julianaweg 141 R","postcode":"1131 DH","email":"info@sekubouw.nl","phone":"0299 323 386","website":"https://www.sekubouw.nl/","what":"Renovation, maintenance and sustainability partner for property owners, housing corporations, developers and property managers; active in mutation maintenance, complaint maintenance, renovation and sustainability projects.","reason":"Smaller than the national groups but highly relevant for Amsterdam because the company explicitly targets property maintenance, mutation maintenance and renovation projects in Amsterdam and the surrounding region.","lat":52.494,"lng":5.076},{"order":15,"group":"installer","category":"Installer / maintenance contractor","name":"Sira Bouw B.V.","region":"Haarlem / Amsterdam region","city":"Haarlem","street":"Palletweg 64","postcode":"2031 DC","email":"info@sirabouw.nl","phone":"020 619 91 92","website":"https://sirabouw.nl/","what":"Regional contractor for renovations, extensions, fit-out and real-estate maintenance, with a stated focus on sustainable materials and energy-efficient solutions.","reason":"Interesting as a smaller regional renovation contractor with repeated Amsterdam project references and a strong renovation and maintenance profile.","lat":52.392,"lng":4.658},{"order":16,"group":"installer","category":"Installer / maintenance contractor","name":"Van Wijnen Amsterdam","region":"Diemen / Amsterdam","city":"Diemen","street":"Diemerhof 32","postcode":"1112 XN","email":"amsterdam@vanwijnen.nl","phone":"020 364 40 00","website":"https://www.vanwijnen.nl/","what":"Construction company that initiates, advises, develops, delivers and manages real estate; the Amsterdam/Diemen branch focuses on renovation, transformation and property management.","reason":"Relevant because of its scale, local branch and proven ability to scale renovation and sustainability concepts once a product introduction gains traction.","lat":52.338,"lng":4.963},{"order":17,"group":"installer","category":"Installer / maintenance contractor","name":"Zaanderwijk","region":"De Goorn / Zaanstreek","city":"De Goorn","street":"Wieder 21","postcode":"1648 GA","email":"commercie@zaanderwijk.nl","phone":"072 571 81 51","website":"https://zaanderwijk.nl/","what":"Maintenance and sustainability partner focused on housing associations, energy-improvement projects and long-term maintenance cooperation.","reason":"Strong regional lead for Zaanstad and the north-western Amsterdam ring because of its housing-association experience and visible project references in Amsterdam.","lat":52.625,"lng":4.947},{"order":18,"group":"installer","category":"Installer / insulation specialist","name":"Cornisol Group","region":"Weesp / Amsterdam region","city":"Weesp","street":"Gooilandseweg 2","postcode":"1381 HR","email":"info@cornisol.com","phone":"020 636 8525","website":"https://www.cornisol.com/","what":"Specialist contractor in technical insulation and fire prevention, serving building, utilities, real-estate and technical projects around Amsterdam.","reason":"Interesting as a smaller specialist close to Amsterdam with strong insulation know-how and project-based execution capability, even if its core focus is broader technical insulation rather than interior residential walls.","lat":52.308,"lng":5.03},{"order":19,"group":"installer","category":"Installer / insulation specialist","name":"Eneriso","region":"Amsterdam-Zuidoost","city":"Amsterdam","street":"De Entree 201","postcode":"1101 HG","email":"info@eneriso.nl","phone":"020 210 11 41","website":"https://www.eneriso-isolatie.nl/","what":"Insulation specialist for project-based insulation work in cooperation with construction companies, maintenance contractors and housing associations.","reason":"Relevant because Eneriso sits closer to the core insulation challenge than general maintenance contractors and is therefore interesting as a technical pilot partner.","lat":52.312,"lng":4.945},{"order":20,"group":"installer","category":"Installer / moisture specialist","name":"Vochtweringdirect","region":"Amsterdam-West / Sloterdijk","city":"Amsterdam","street":"Orlyplein 85","postcode":"1043 DS","email":"info@vochtweringdirect.nl","phone":"020 210 1029 / 020 21 010 88","website":"https://vochtweringdirect.nl/","what":"Moisture-control specialist for damp walls and floors, rising damp, penetrating damp, mould and basement leakage, also listing cavity-wall and floor insulation among its services.","reason":"Very relevant for Skamowall because damp and mould problems are close to the trigger cases where an interior-wall solution can be introduced after diagnosis and remediation.","lat":52.39,"lng":4.837},{"order":21,"group":"distributor","category":"Distributor / merchant","name":"Bouwmaat Amsterdam Sloterdijk XL","region":"Amsterdam-West / Sloterdijk","city":"Amsterdam","street":"Gyroscoopweg 142","postcode":"1042 AZ","email":"sloterdijk@bouwmaat.nl","phone":"020 448 04 84","website":"https://www.bouwmaat.nl/","what":"Professional merchant for building materials, tools and services for the repair, renovation and maintenance market.","reason":"Relevant as a local distribution channel because Bouwmaat serves professional builders daily and the west-Amsterdam branch is a logical trade-counter route.","lat":52.403,"lng":4.828},{"order":22,"group":"distributor","category":"Distributor / merchant","name":"Jongeneel Amsterdam","region":"Amsterdam-West / Houthavens","city":"Amsterdam","street":"Rigakade 8","postcode":"1013 BC","email":"amsterdam@jongeneel.nl","phone":"020 682 58 05","website":"https://www.jongeneel.nl/","what":"Timber, sheet-material and building-material merchant with logistics and custom-processing services for professional builders.","reason":"Relevant as a distribution partner because the Amsterdam branch sits in a strong contractor cluster and Jongeneel explicitly offers insulation materials and custom services.","lat":52.394,"lng":4.873},{"order":23,"group":"distributor","category":"Distributor / merchant","name":"PontMeyer Amsterdam","region":"Amsterdam-West / Houthavens","city":"Amsterdam","street":"Rigakade 28-30","postcode":"1013 BC","email":"amsterdam@pontmeyer.nl","phone":"020 682 70 05","website":"https://www.pontmeyer.nl/","what":"National timber and building-material merchant serving contractors and professional builders.","reason":"Relevant as a distribution route because the branch sits directly in Amsterdam\u0027s contractor cluster and gives broad access to renovation and maintenance professionals.","lat":52.394,"lng":4.875},{"order":24,"group":"distributor","category":"Distributor / merchant","name":"PontMeyer Amsterdam Zuidoost","region":"Amsterdam-Zuidoost / Duivendrecht","city":"Duivendrecht","street":"Van der Madeweg 16a+b","postcode":"1114 AM","email":"amsterdamzuidoost@pontmeyer.nl","phone":"020 592 66 00","website":"https://www.pontmeyer.nl/","what":"National timber and building-material merchant serving contractors and professional builders.","reason":"Relevant for coverage of Zuidoost, Duivendrecht and Diemen, making it a useful second local merchant route alongside Houthavens.","lat":52.326,"lng":4.931},{"order":25,"group":"distributor","category":"Distributor / merchant","name":"Stiho Amsterdam Amstel","region":"Amsterdam-Oost / Amstel","city":"Amsterdam","street":"Wenckebachweg 165","postcode":"1096 AM","email":"stihoamsterdamamstel@stiho.nl","phone":"020 560 76 66","website":"https://www.stiho.nl/","what":"Building-material merchant for contractors offering timber, sheet goods, general building materials, ironmongery and tools.","reason":"Relevant for the east and south sides of Amsterdam and for contractors who do not buy through Houthavens.","lat":52.343,"lng":4.929},{"order":26,"group":"distributor","category":"Distributor / merchant","name":"Stiho Amsterdam Houthavens","region":"Amsterdam-West / Houthavens","city":"Amsterdam","street":"Rigakade 37","postcode":"1013 BB","email":"stihoamsterdamhouthavens@stiho.nl","phone":"020 581 85 08","website":"https://www.stiho.nl/","what":"Building-material merchant for contractors offering timber, sheet goods, general building materials, ironmongery and tools.","reason":"Relevant as a core branch in the Amsterdam Houthavens contractor cluster; the branch page explicitly mentions insulation categories.","lat":52.395,"lng":4.875},{"order":27,"group":"housing","category":"Housing association","name":"Eigen Haard","region":"Amsterdam-West","city":"Amsterdam","street":"Arlandaweg 88","postcode":"1043 EX","email":"info@eigenhaard.nl","phone":"020 680 18 01","website":"https://www.eigenhaard.nl/","what":"Housing association that rents, maintains, renovates and develops social and mid-market homes in the Amsterdam metropolitan region.","reason":"Relevant because Eigen Haard is a very large housing association in the region, active in maintenance, renovation and livability, with a large base of relevant existing stock.","lat":52.39,"lng":4.833},{"order":28,"group":"housing","category":"Housing association","name":"Elan Wonen","region":"Haarlem","city":"Haarlem","street":"Houtplein 29 en 33","postcode":"2012 DE","email":"mail@elanwonen.nl","phone":"023 515 98 59","website":"https://www.elanwonen.nl/","what":"Housing association that builds, manages, renovates and improves social rental homes in Haarlem and Heemstede.","reason":"Relevant as a western-edge lead in the Amsterdam region, with existing stock and visible renovation and sustainability projects.","lat":52.381,"lng":4.627},{"order":29,"group":"housing","category":"Housing association","name":"Intermaris","region":"Purmerend / Waterland","city":"Purmerend","street":"Kometenstraat 6","postcode":"1443 BA","email":"info@intermaris.nl","phone":"088 25 20 100","website":"https://www.intermaris.nl/","what":"Housing association that rents, maintains, renovates and develops affordable homes in Hoorn, Purmerend and Waterland.","reason":"Relevant as a northern extension of the Amsterdam sales radius, with substantial existing stock and active renovation and sustainability programmes.","lat":52.505,"lng":4.959},{"order":30,"group":"housing","category":"Housing association","name":"Parteon","region":"Wormerveer / Zaanstreek","city":"Wormerveer","street":"Marktstraat 52","postcode":"1521 DZ","email":"info@parteon.nl","phone":"075 627 50 00","website":"https://www.parteon.nl/","what":"Housing association that rents, maintains, improves and adds affordable homes in the Zaanstreek area.","reason":"Relevant because Parteon operates directly in Zaanstreek and is therefore a logical housing-association lead for north-of-Amsterdam market expansion and comparable existing stock.","lat":52.491,"lng":4.793},{"order":31,"group":"housing","category":"Housing association","name":"Rochdale","region":"Amsterdam-West","city":"Amsterdam","street":"Bos en Lommerplein 303","postcode":"1055 RW","email":"info@rochdale.nl","phone":"020 215 00 00","website":"https://www.rochdale.nl/","what":"Housing association that rents, maintains, renovates and develops homes in Amsterdam, Zaanstad, Purmerend and surrounding municipalities.","reason":"Relevant because Rochdale operates exactly in the target area and has a large renovation and sustainability agenda in existing housing stock.","lat":52.378,"lng":4.848},{"order":32,"group":"housing","category":"Housing association","name":"Stadgenoot","region":"Amsterdam-Centrum / Oost","city":"Amsterdam","street":"Sarphatistraat 410","postcode":"1018 GW","email":"info@stadgenoot.nl","phone":"020 511 80 00","website":"https://www.stadgenoot.nl/","what":"Amsterdam housing association that rents, maintains, renovates and adds affordable homes in the city.","reason":"Relevant because Stadgenoot is focused purely on Amsterdam, holds extensive existing stock and communicates publicly about maintenance, sustainability, damp and mould.","lat":52.364,"lng":4.908},{"order":33,"group":"housing","category":"Housing association","name":"Ymere","region":"Amsterdam","city":"Amsterdam","street":"Jollemanhof 21","postcode":"1019 GW","email":"klantenservice@ymere.nl","phone":"088 000 89 00","website":"https://www.ymere.nl/","what":"Large housing association in the Amsterdam metropolitan region that rents, maintains, improves and adds homes.","reason":"Relevant because Ymere has substantial existing stock in the exact target area and was highly active in new-build, sustainability and neighbourhood quality work in 2024.","lat":52.37,"lng":4.932}];
+    const colors = {
+      installer: '#eb7a00',
+      housing: '#18864b',
+      distributor: '#2563eb',
+      other: '#64748b'
+    };
+
+    const state = {
+      installer: true,
+      housing: true,
+      distributor: true
+    };
+
+    const groupOrder = { installer: 0, housing: 1, distributor: 2, other: 3 };
+
+    const map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    map.setView([52.37, 4.90], 10);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
+
+    const layers = {
+      installer: L.layerGroup().addTo(map),
+      housing: L.layerGroup().addTo(map),
+      distributor: L.layerGroup().addTo(map)
+    };
+
+    const leadList = document.getElementById('lead-list');
+    let activeName = null;
+
+    function isDirectFit(lead) {
+      return lead.category.includes('insulation') || lead.category.includes('moisture');
+    }
+
+    function markerRadius(lead) {
+      if (isDirectFit(lead)) return 9;
+      if (lead.group === 'installer') return 8;
+      return 7;
+    }
+
+    function popupHtml(lead) {
+      const locationBits = [];
+      if (lead.street) locationBits.push(lead.street);
+      if (lead.postcode || lead.city) locationBits.push((lead.postcode + ' ' + lead.city).trim());
+      const contact = locationBits.join(', ');
+      const email = lead.email ? '<div><b>Email</b><a href="mailto:' + lead.email + '">' + lead.email + '</a></div>' : '';
+      const phone = lead.phone ? '<div><b>Phone</b>' + lead.phone + '</div>' : '';
+
+      return [
+        '<div class="popup-title">' + lead.name + '</div>',
+        '<div class="popup-meta">' + lead.category + '</div>',
+        '<div class="popup-block"><b>Region</b>' + lead.region + '</div>',
+        '<div class="popup-block"><b>Address</b>' + contact + '</div>',
+        email,
+        phone,
+        '<div class="popup-block"><b>Website</b><a href="' + lead.website + '" target="_blank" rel="noreferrer">' + lead.website + '</a></div>',
+        '<div class="popup-block"><b>What they do</b>' + lead.what + '</div>',
+        '<div class="popup-block"><b>Why included</b>' + lead.reason + '</div>'
+      ].join('');
+    }
+
+    function visibleLeads() {
+      return leads.filter((lead) => state[lead.group]);
+    }
+
+    function fitTo(targetLeads) {
+      if (!targetLeads.length) {
+        map.setView([52.37, 4.90], 10);
+        return;
+      }
+
+      const bounds = targetLeads.map((lead) => [lead.lat, lead.lng]);
+      map.fitBounds(bounds, { padding: [36, 36] });
+    }
+
+    function renderMarkers() {
+      Object.values(layers).forEach((layer) => layer.clearLayers());
+
+      visibleLeads().forEach((lead) => {
+        const highlight = isDirectFit(lead);
+        const marker = L.circleMarker([lead.lat, lead.lng], {
+          radius: markerRadius(lead),
+          color: highlight ? '#6f4c00' : colors[lead.group],
+          weight: highlight ? 3 : 2,
+          fillColor: highlight ? '#ffc857' : colors[lead.group],
+          fillOpacity: 0.82
+        });
+
+        marker.bindPopup(popupHtml(lead));
+        marker.on('click', () => {
+          activeName = lead.name;
+          renderList();
+        });
+
+        marker.addTo(layers[lead.group]);
+      });
+    }
+
+    function renderStats() {
+      const visible = visibleLeads();
+      document.getElementById('stat-total').textContent = visible.length;
+      document.getElementById('stat-installer').textContent = visible.filter((lead) => lead.group === 'installer').length;
+      document.getElementById('stat-housing').textContent = visible.filter((lead) => lead.group === 'housing').length;
+      document.getElementById('stat-distributor').textContent = visible.filter((lead) => lead.group === 'distributor').length;
+    }
+
+    function sortedVisibleLeads() {
+      return visibleLeads().slice().sort((a, b) => {
+        const groupDelta = groupOrder[a.group] - groupOrder[b.group];
+        if (groupDelta !== 0) return groupDelta;
+        return a.order - b.order;
+      });
+    }
+
+    function renderList() {
+      const visible = sortedVisibleLeads();
+      leadList.innerHTML = '';
+
+      visible.forEach((lead) => {
+        const item = document.createElement('div');
+        item.className = 'lead-item' + (activeName === lead.name ? ' active' : '');
+        item.innerHTML = [
+          '<div class="lead-top">',
+          '<div class="rank">#' + lead.order + '</div>',
+          '<div class="badge ' + lead.group + '">' + lead.group + '</div>',
+          '</div>',
+          '<div class="lead-name">' + lead.name + '</div>',
+          '<div class="lead-meta">' + lead.city + ' | ' + lead.category + '</div>',
+          '<div class="lead-meta" style="margin-top: 6px;">' + lead.street + '</div>'
+        ].join('');
+
+        item.addEventListener('click', () => {
+          activeName = lead.name;
+          renderList();
+          map.setView([lead.lat, lead.lng], Math.max(map.getZoom(), 12));
+          const targetLayer = layers[lead.group];
+          targetLayer.eachLayer((marker) => {
+            const latlng = marker.getLatLng();
+            if (Math.abs(latlng.lat - lead.lat) < 0.00001 && Math.abs(latlng.lng - lead.lng) < 0.00001) {
+              marker.openPopup();
+            }
+          });
+        });
+
+        leadList.appendChild(item);
+      });
+    }
+
+    function refresh(fit = false) {
+      renderMarkers();
+      renderStats();
+      renderList();
+      if (fit) fitTo(visibleLeads());
+    }
+
+    document.getElementById('toggle-installers').addEventListener('change', (event) => {
+      state.installer = event.target.checked;
+      refresh(true);
+    });
+
+    document.getElementById('toggle-housing').addEventListener('change', (event) => {
+      state.housing = event.target.checked;
+      refresh(true);
+    });
+
+    document.getElementById('toggle-distributors').addEventListener('change', (event) => {
+      state.distributor = event.target.checked;
+      refresh(true);
+    });
+
+    document.getElementById('fit-all').addEventListener('click', () => fitTo(visibleLeads()));
+    document.getElementById('fit-installers').addEventListener('click', () => fitTo(visibleLeads().filter((lead) => lead.group === 'installer')));
+    document.getElementById('reset-core').addEventListener('click', () => map.setView([52.37, 4.90], 10));
+
+    refresh(true);
+  </script>
+</body>
+</html>
