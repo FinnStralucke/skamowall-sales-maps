@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>South Sweden Sales Leads SkamoWall</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --installer: #eb7a00;
+      --housing: #18864b;
+      --distributor: #2563eb;
+      --ink: #17202a;
+      --muted: #5f6c7b;
+      --line: #d7dee6;
+      --panel: #ffffff;
+      --bg: #eef3f6;
+      --a1: #ffc857;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #fff 0%, #f7f9fb 100%);
+      border-right: 1px solid var(--line);
+      padding: 20px 18px 28px;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--installer);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+    }
+
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f4f7fa; }
+
+    .lead-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lead-filters {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+
+    .filter-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .filter-input,
+    .filter-select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      border-color: rgba(235, 122, 0, 0.55);
+      box-shadow: 0 0 0 3px rgba(235, 122, 0, 0.10);
+    }
+
+    .lead-empty {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 16px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .lead-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .lead-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+    }
+
+    .lead-item.active {
+      border-color: var(--installer);
+      box-shadow: 0 0 0 3px rgba(235, 122, 0, 0.14);
+    }
+
+    .lead-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.a1 {
+      background: rgba(255, 200, 87, 0.25);
+      color: #6f4c00;
+    }
+
+    .badge.a2 {
+      background: rgba(235, 122, 0, 0.12);
+      color: #8a4600;
+    }
+
+    .badge.b1 {
+      background: rgba(24, 134, 75, 0.12);
+      color: #15643a;
+    }
+
+    .badge.c1 {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+    }
+
+    .lead-name {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .lead-meta {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .map-shell {
+      position: relative;
+      height: 100vh;
+      min-height: 100vh;
+      background: #dfe6ec;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 900;
+      width: min(220px, calc(100% - 20px));
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(215, 222, 230, 0.95);
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+      box-shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .map-controls strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .map-controls label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .map-controls .dot {
+      width: 10px;
+      height: 10px;
+    }
+
+    .detail-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 880;
+      width: min(360px, 42vw);
+      height: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      border-left: 1px solid rgba(215, 222, 230, 0.95);
+      box-shadow: -14px 0 30px rgba(16, 24, 40, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .detail-panel.open {
+      transform: translateX(0);
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 249, 251, 0.96);
+    }
+
+    .detail-back {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .detail-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .detail-empty {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      padding-top: 6px;
+    }
+
+    .detail-title {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .detail-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .detail-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .detail-chip.a1 {
+      background: rgba(255, 200, 87, 0.25);
+      color: #6f4c00;
+    }
+
+    .detail-chip.a2 {
+      background: rgba(235, 122, 0, 0.12);
+      color: #8a4600;
+    }
+
+    .detail-chip.b1 {
+      background: rgba(24, 134, 75, 0.12);
+      color: #15643a;
+    }
+
+    .detail-chip.c1 {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+    }
+
+    .detail-block {
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .detail-block b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .detail-link {
+      color: #1d4ed8;
+      text-decoration: none;
+      word-break: break-word;
+    }
+
+    .detail-link:hover {
+      text-decoration: underline;
+    }
+
+    .leaflet-popup-content {
+      width: 300px;
+      margin: 12px 14px;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .popup-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .popup-meta {
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .popup-block {
+      margin-top: 8px;
+    }
+
+    .popup-block b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 10px;
+      color: #61707f;
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 8px 0 0 0;
+      padding: 2px 6px;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        height: auto;
+        overflow: auto;
+      }
+      .app {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        height: auto;
+        max-height: 48vh;
+      }
+      .map-shell {
+        height: 52vh;
+        min-height: 52vh;
+      }
+      .map-controls {
+        width: min(210px, calc(100% - 16px));
+        top: 8px;
+        left: 8px;
+      }
+      .detail-panel {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>South Sweden Sales Leads SkamoWall</h1>
+
+      <section class="card">
+        <strong>Leads</strong>
+        <div class="lead-filters">
+          <div class="filter-field">
+            <label for="filter-area">Area</label>
+            <select id="filter-area" class="filter-select">
+              <option value="">All areas</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="filter-name">Search name</label>
+            <input id="filter-name" class="filter-input" type="text" placeholder="Search company name">
+          </div>
+        </div>
+        <div id="lead-list" class="lead-list" style="margin-top: 12px;"></div>
+      </section>
+    </aside>
+
+    <main class="map-shell">
+      <div id="map"></div>
+
+      <section class="map-controls">
+        <strong>Layers</strong>
+        <label><input type="checkbox" id="toggle-installers" checked> <span class="dot" style="background: var(--installer);"></span> Installers</label>
+        <label><input type="checkbox" id="toggle-housing" checked> <span class="dot" style="background: var(--housing);"></span> Housing associations</label>
+        <label><input type="checkbox" id="toggle-distributors" checked> <span class="dot" style="background: var(--distributor);"></span> Distributors</label>
+      </section>
+
+      <aside id="detail-panel" class="detail-panel" aria-hidden="true">
+        <div class="detail-head">
+          <button id="detail-back" class="detail-back" type="button">Back to list</button>
+        </div>
+        <div id="detail-content" class="detail-content">
+          <div class="detail-empty">Select a lead on the map or in the list to view details here.</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const leads = [{"priority":1,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / retrofit contractor","country":"Sweden","name":"Klimatfastigheter Småland AB","region":"Växjö / Småland","city":"Växjö","municipality":"Vaxjo Municipality","areaGroup":"Smaland","street":"","postcode":"","email":"info@klimatfastigheter.se","phone":"","website":"https://klimatfastigheter.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Klimatfastigheter%20Sm%C3%A5land%20AB%2C%20V%C3%A4xj%C3%B6%2C%20Sweden","what":"One-stop-shop energy-renovation partner for housing associations and commercial property owners, coordinating retrofit measures such as energy renovation, heat pumps, solar and battery solutions.","reason":"Best first-mover style prospect in southern Sweden because it is a young, growth-oriented retrofit company with strong innovation language, public development activity and a consultative model that fits pilot adoption and technical onboarding.","lat":56.879,"lng":14.805},{"priority":2,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / moisture specialist","country":"Sweden","name":"Waterproof Direct Sverige AB","region":"Stockholm / Mälardalen","city":"Bromma","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"Johannesfredsvägen 11 A","postcode":"168 69","email":"info@waterproof-direct.se","phone":"08-760 80 70","website":"https://www.waterproof-direct.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Waterproof%20Direct%20Sverige%20AB%2C%20Johannesfredsv%C3%A4gen%2011%20A%2C%20168%2069%2C%20Bromma%2C%20Sweden","what":"Moisture and mould specialist focused on remediation, dehumidification and ventilation-related solutions for buildings in the Stockholm region.","reason":"Very strong SkamoWall trigger-case fit because many projects start with damp, mould and indoor-climate problems, and the company is visibly positioned around exactly those pain points.","lat":59.334,"lng":18.063},{"priority":3,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / insulation specialist","country":"Sweden","name":"Högsboverken Isolering AB","region":"Göteborg / Västra Götaland","city":"Mölndal","municipality":"Molndal Municipality","areaGroup":"Vastra Gotaland","street":"Gunnavägen 4A","postcode":"431 35","email":"info@hogsboverken.se","phone":"031-27 08 87","website":"https://hogsboverken.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=H%C3%B6gsboverken%20Isolering%20AB%2C%20Gunnav%C3%A4gen%204A%2C%20431%2035%2C%20M%C3%B6lndal%2C%20Sweden","what":"Regional insulation specialist delivering loose-fill insulation and insulation upgrades for attics, roofs, walls and floors.","reason":"Good early-adopter fit because it is a focused specialist rather than a large general contractor, already works directly with insulation systems, and looks well suited to practical first-project training.","lat":57.654,"lng":12.012},{"priority":4,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / insulation specialist","country":"Sweden","name":"Isolering Uppsala (Isolerab)","region":"Uppsala","city":"Uppsala","municipality":"Uppsala Municipality","areaGroup":"Uppsala","street":"","postcode":"","email":"info@isolerab.se","phone":"020-48 00 10","website":"https://www.isoleringuppsala.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Isolering%20Uppsala%20(Isolerab)%2C%20Uppsala%2C%20Sweden","what":"Uppsala-focused insulation provider promoting modern insulation products and efficient loose-fill insulation for homes in the local market.","reason":"Strong early-adopter candidate because it is directly active in insulation, positioned on a local Uppsala microsite, and looks suitable for targeted pilot projects in the northern edge of the defined Sweden scope.","lat":59.858,"lng":17.638},{"priority":5,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / moisture specialist","country":"Sweden","name":"Fuktspecialisten Stockholm","region":"Stockholm","city":"Hägersten","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"C/O Quick Office, Telefonvägen 30","postcode":"12626","email":"info@fuktspecialisten.se","phone":"0700-18 54 42","website":"https://fuktspecialisten.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Fuktspecialisten%20Stockholm%2C%20C%2FO%20Quick%20Office%2C%20Telefonv%C3%A4gen%2030%2C%2012626%2C%20H%C3%A4gersten%2C%20Sweden","what":"Stockholm specialist in moisture-safe construction, moisture investigations and remedial work for buildings with damp-related issues.","reason":"Strong first-wave prospect because it is a focused local specialist around the exact moisture and indoor-climate problems that can open the door to SkamoWall projects in existing housing.","lat":59.296,"lng":17.981},{"priority":6,"tierCode":"A1","tierLabel":"Pot. early adopter installer","group":"installer","category":"Installer / moisture specialist","country":"Sweden","name":"AHT-Byggnadshälsa AB","region":"Uppsala","city":"Uppsala","municipality":"Uppsala Municipality","areaGroup":"Uppsala","street":"Stenhagsvägen 249","postcode":"752 66","email":"info@aht-sweden.se","phone":"018-50 01 30","website":"https://www.aht-sweden.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AHT-Byggnadsh%C3%A4lsa%20AB%2C%20Stenhagsv%C3%A4gen%20249%2C%20752%2066%2C%20Uppsala%2C%20Sweden","what":"Technical moisture specialist offering investigations, mould remediation, drainage, dehumidification and building-health solutions for problem properties.","reason":"High-priority SkamoWall fit because it works directly on chronic damp and mould cases, publishes technical solution language, and sits at the northern edge of the target geography in Uppsala.","lat":59.87,"lng":17.592},{"priority":7,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer / moisture specialist","country":"Sweden","name":"Avfuktningsteknik Sverige AB","region":"Stockholm / Mälardalen","city":"Bromma","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"Johannesfredsvägen 11A","postcode":"168 69","email":"kontakt@avfuktningsteknik.se","phone":"010-516 46 66","website":"https://avfuktningsteknik.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Avfuktningsteknik%20Sverige%20AB%2C%20Johannesfredsv%C3%A4gen%2011A%2C%20168%2069%2C%20Bromma%2C%20Sweden","what":"Moisture, mould, ventilation and dehumidification specialist serving Stockholm County, Malaradalen and nearby areas, with dedicated remediation and indoor-climate services.","reason":"Good early-adopter prospect because it combines mould remediation, ventilation, vented-floor know-how and broad field activity in existing buildings, which matches common SkamoWall trigger situations.","lat":59.338,"lng":17.943},{"priority":8,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer / retrofit contractor","country":"Sweden","name":"Total Fasad Stockholm AB","region":"Stockholm","city":"Johanneshov","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"Olaus Magnus väg 17","postcode":"121 45","email":"info@totalfasad.se","phone":"08-30 10 25","website":"https://totalfasad.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Total%20Fasad%20Stockholm%20AB%2C%20Olaus%20Magnus%20v%C3%A4g%2017%2C%20121%2045%2C%20Johanneshov%2C%20Sweden","what":"Facade contractor delivering facade renovation, plastering, masonry and building-envelope work for property owners, housing associations and commercial customers.","reason":"Relevant because facade and envelope specialists can become strong execution partners once a new internal wall or moisture-control solution proves itself, and the firm has a clear Stockholm retrofit profile.","lat":59.297,"lng":18.092},{"priority":9,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer / insulation specialist","country":"Sweden","name":"Stockholm Fasad \u0026 Konsult AB","region":"Stockholm","city":"Stockholm","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"","postcode":"","email":"info@stockholmfasad.se","phone":"070-438 00 10","website":"https://www.stockholmfasad.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Stockholm%20Fasad%20%26%20Konsult%20AB%2C%20Stockholm%2C%20Sweden","what":"Facade, masonry and plaster contractor offering customer-adapted facade solutions, including plaster systems and additional insulation work.","reason":"Useful secondary prospect because it is a smaller specialist facade company with additional-insulation capability and a local Stockholm profile that can support first reference projects.","lat":59.329,"lng":18.065},{"priority":10,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer / moisture specialist","country":"Sweden","name":"Malmö Sanering och Rivning AB","region":"Skåne / Malmö region","city":"Eslöv","municipality":"Eslov Municipality","areaGroup":"Skane","street":"Brönneslöv 17","postcode":"241 93","email":"msanering@yahoo.com","phone":"040-96 63 00","website":"https://malmosanering.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Malm%C3%B6%20Sanering%20och%20Rivning%20AB%2C%20Br%C3%B6nnesl%C3%B6v%2017%2C%20241%2093%2C%20Esl%C3%B6v%2C%20Sweden","what":"Skåne remediation and demolition company handling hazardous materials, mould-related clean-up and building clean-out work.","reason":"Relevant because remediation specialists often see the exact moisture-damaged building fabric where SkamoWall can later solve recurring cold-wall and mould issues, especially in older southern Sweden stock.","lat":55.839,"lng":13.303},{"priority":11,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Uppsalahem AB","region":"Uppsala","city":"Uppsala","municipality":"Uppsala Municipality","areaGroup":"Uppsala","street":"Väderkvarnsgatan 17","postcode":"753 30","email":"","phone":"018-727 36 00","website":"https://www.uppsalahem.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Uppsalahem%20AB%2C%20V%C3%A4derkvarnsgatan%2017%2C%20753%2030%2C%20Uppsala%2C%20Sweden","what":"Municipal housing company managing and developing rental housing stock in Uppsala, with tenant service, maintenance and renovation responsibilities.","reason":"Included because it offers direct access to larger existing-housing stock at the northern limit of the target geography, where damp, cold-wall and retrofit issues can translate into repeat SkamoWall demand.","lat":59.858,"lng":17.646},{"priority":12,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"AB Stockholmshem","region":"Stockholm","city":"Skärholmen","municipality":"Stockholm Municipality","areaGroup":"Stockholm / Malardalen","street":"Bredholmstorget 16","postcode":"127 02","email":"","phone":"08-508 390 00","website":"https://www.stockholmshem.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AB%20Stockholmshem%2C%20Bredholmstorget%2016%2C%20127%2002%2C%20Sk%C3%A4rholmen%2C%20Sweden","what":"Large municipal housing company in Stockholm managing rental housing, tenant services, sustainable building and renovation activity.","reason":"Included because Stockholm stock size, sustainability work and major maintenance responsibilities make it a strong future buyer or reference owner for SkamoWall once installer partners are in place.","lat":59.277,"lng":17.907},{"priority":13,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Bostadsaktiebolaget Poseidon","region":"Gothenburg","city":"Angered","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Box 1","postcode":"424 21","email":"info@poseidon.goteborg.se","phone":"031-332 10 00","website":"https://poseidon.goteborg.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Bostadsaktiebolaget%20Poseidon%2C%20Box%201%2C%20424%2021%2C%20Angered%2C%20Sweden","what":"Municipal housing company in Gothenburg managing large residential stock with area management, maintenance and housing-development responsibilities.","reason":"Included because Gothenburg is a priority southern market and Poseidon offers a route into large-scale existing housing where moisture, comfort and renovation issues can create SkamoWall opportunities.","lat":57.799,"lng":12.048},{"priority":14,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"MKB Fastighets AB","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"","postcode":"","email":"info@mkbfastighet.se","phone":"040-31 33 00","website":"https://www.mkbfastighet.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=MKB%20Fastighets%20AB%2C%20Malm%C3%B6%2C%20Sweden","what":"Municipal housing company in Malmö responsible for a large urban rental portfolio, tenant services and long-term housing development.","reason":"Included because MKB gives access to one of the most relevant existing-housing markets in southern Sweden, especially for damp, comfort and energy-upgrade related product discussions.","lat":55.605,"lng":13.003},{"priority":15,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Helsingborgshem AB","region":"Helsingborg / Skåne","city":"Helsingborg","municipality":"Helsingborg Municipality","areaGroup":"Skane","street":"Regementsvägen 2B","postcode":"254 57","email":"info@helsingborgshem.se","phone":"042-20 80 00","website":"https://www.helsingborgshem.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Helsingborgshem%20AB%2C%20Regementsv%C3%A4gen%202B%2C%20254%2057%2C%20Helsingborg%2C%20Sweden","what":"Municipal housing company in Helsingborg managing rental housing, customer service and housing maintenance across the city.","reason":"Included because it broadens coverage in Skåne beyond Malmö and gives access to additional existing-housing stock relevant for moisture and retrofit-oriented solutions.","lat":56.066,"lng":12.718},{"priority":16,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"AB Stångåstaden","region":"Linköping / Östergötland","city":"Linköping","municipality":"Linkoping Municipality","areaGroup":"Ostergotland","street":"Djurgårdsgatan 3A","postcode":"580 03","email":"foretaget@stangastaden.se","phone":"013-208500","website":"https://www.stangastaden.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AB%20St%C3%A5ng%C3%A5staden%2C%20Djurg%C3%A5rdsgatan%203A%2C%20580%2003%2C%20Link%C3%B6ping%2C%20Sweden","what":"Municipal housing company in Linköping managing rental housing, customer service, sustainability work and property operations.","reason":"Included because it improves geographic spread between Stockholm and southern Skåne while still sitting within the defined north-south target band for Sweden.","lat":58.41,"lng":15.621},{"priority":17,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Beijer Byggmaterial Uppsala","region":"Uppsala","city":"Uppsala","municipality":"Uppsala Municipality","areaGroup":"Uppsala","street":"Stångjärnsgatan 17-19","postcode":"753 23","email":"info@uppsala.beijerbygg.se","phone":"075-241 3176","website":"https://www.beijerbygg.se/privat/sv/uppsala","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Beijer%20Byggmaterial%20Uppsala%2C%20St%C3%A5ngj%C3%A4rnsgatan%2017-19%2C%20753%2023%2C%20Uppsala%2C%20Sweden","what":"Regional building-material merchant branch supplying trade customers with construction products and site materials in Uppsala.","reason":"Included as a distributor route for future SkamoWall stocking and installer referrals in the northern part of the Sweden target geography.","lat":59.869,"lng":17.684},{"priority":18,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Beijer Byggmaterial Göteborg Hisings Backa","region":"Göteborg / Västra Götaland","city":"Hisings Backa","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Exportgatan 3","postcode":"422 46","email":"order@goteborg.beijerbygg.se","phone":"075-241 3310","website":"https://www.beijerbygg.se/privat/sv/goteborg-hisings-backa","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Beijer%20Byggmaterial%20G%C3%B6teborg%20Hisings%20Backa%2C%20Exportgatan%203%2C%20422%2046%2C%20Hisings%20Backa%2C%20Sweden","what":"Trade building-material branch serving the Gothenburg market with construction, insulation and site products.","reason":"Included because Gothenburg distribution coverage matters for installer activation and because merchant relationships can help identify receptive local contractors.","lat":57.755,"lng":11.981},{"priority":19,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Beijer Byggmaterial Malmö Arlöv","region":"Malmö / Skåne","city":"Arlöv","municipality":"Burlov Municipality","areaGroup":"Skane","street":"Hantverkaregatan 6","postcode":"232 34","email":"","phone":"075-241 3571","website":"https://www.beijerbygg.se/privat/sv/malmo-arlov","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Beijer%20Byggmaterial%20Malm%C3%B6%20Arl%C3%B6v%2C%20Hantverkaregatan%206%2C%20232%2034%2C%20Arl%C3%B6v%2C%20Sweden","what":"Trade merchant branch covering the Malmö area with construction materials and contractor supply.","reason":"Included because Skåne distribution access is useful for future stocking, local contractor introductions and practical rollout support in the southernmost part of Sweden.","lat":55.632,"lng":13.071},{"priority":20,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Derome Bygg \u0026 Industri Tagene","region":"Göteborg / Västra Götaland","city":"Hisings Backa","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Tagenevägen 13","postcode":"422 59","email":"kundsupport@support.derome.se","phone":"031-350 16 00","website":"https://www.derome.se/kontakt/hitta-till-oss/dbi-tagene","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Derome%20Bygg%20%26%20Industri%20Tagene%2C%20Tagenev%C3%A4gen%2013%2C%20422%2059%2C%20Hisings%20Backa%2C%20Sweden","what":"Building and industry merchant branch serving professional customers with timber, building materials and contractor supply in the Gothenburg market.","reason":"Included because Derome broadens merchant coverage beyond Beijer and can support a wider installer network once product-market fit is proven locally.","lat":57.756,"lng":11.979},{"priority":21,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Derome Bygg \u0026 Industri Malmö City","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"Agneslundsvägen 28","postcode":"212 15","email":"kundsupport@support.derome.se","phone":"040-625 85 00","website":"https://www.derome.se/kontakt/hitta-till-oss/dbi-malmo-city","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Derome%20Bygg%20%26%20Industri%20Malm%C3%B6%20City%2C%20Agneslundsv%C3%A4gen%2028%2C%20212%2015%2C%20Malm%C3%B6%2C%20Sweden","what":"Professional building-material branch for the Malmö market, serving trade customers with building and site products.","reason":"Included because it adds another southern distribution touchpoint outside Beijer and improves practical market coverage for any SkamoWall launch via merchants.","lat":55.592,"lng":13.034},{"priority":22,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Malmö Mur \u0026 Puts AB","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"Russgatan 1","postcode":"212 35","email":"henrik@mmp-ab.se","phone":"+46 (0)72-080 87 88","website":"https://mmp-ab.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Malm%C3%B6%20Mur%20%26%20Puts%20AB%2C%20Russgatan%201%2C%20212%2035%2C%20Malm%C3%B6%2C%20Sweden","what":"Masonry and plaster specialist focused on facade work, plastering and related renovation services.","reason":"Strong SkamoWall fit because the company already works with mineral facade and plaster systems and looks suitable for practical first projects with hands-on installation training.","lat":55.5782207,"lng":13.0701171},{"priority":23,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Murpoolen i Skåne AB","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"Russgatan 1","postcode":"212 35","email":"morgan@murpoolen.se","phone":"+46 (0)70 844 66 45","website":"https://www.murpoolen.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Murpoolen%20i%20Sk%C3%A5ne%20AB%2C%20Russgatan%201%2C%20212%2035%2C%20Malm%C3%B6%2C%20Sweden","what":"Facade, masonry and plaster contractor delivering murning, putsning and related exterior renovation work.","reason":"Good SkamoWall prospect because it is a specialist masonry and plaster company with a clear southern-Sweden footprint and a practical installer profile rather than a generic main contractor.","lat":55.5788207,"lng":13.0709171},{"priority":24,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"AG Mur och Puts","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"","postcode":"","email":"adrian@agmurochputs.se","phone":"0727-181815","website":"https://www.agmurochputs.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AG%20Mur%20och%20Puts%2C%20Malm%C3%B6%2C%20Sweden","what":"Small masonry and plaster contractor showing project references in facade renovation, lime plaster and brickwork.","reason":"Included because the official project references show close material and workmanship overlap with the kind of interior wall and mineral-plaster installation logic that SkamoWall requires.","lat":55.6052931,"lng":13.0001566},{"priority":25,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Malmö Fasad \u0026 Kakel AB","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"","postcode":"","email":"info@malmofasadkakel.se","phone":"070 427 56 27","website":"https://www.malmofasadkakel.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Malm%C3%B6%20Fasad%20%26%20Kakel%20AB%2C%20Malm%C3%B6%2C%20Sweden","what":"Building contractor focused on facade renovation, masonry, plastering, service work and insulation-related exterior upgrades.","reason":"Included because the company already combines facade, plaster and insulation-adjacent work in the Malmö market, making it a credible southern installer candidate for SkamoWall onboarding.","lat":55.6052931,"lng":13.0001566},{"priority":26,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Morneon Fasad AB","region":"Malmö / Skåne","city":"Arlöv","municipality":"Burlov Municipality","areaGroup":"Skane","street":"Santessons väg 7","postcode":"232 61","email":"info@morneonfasad.se","phone":"040-611 00 35","website":"https://morneonfasad.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Morneon%20Fasad%20AB%2C%20Santessons%20v%C3%A4g%207%2C%20232%2061%2C%20Arl%C3%B6v%2C%20Sweden","what":"Facade renovation specialist working with plaster, brick facades, balconies and thermal insulation solutions.","reason":"Very relevant SkamoWall prospect because the company explicitly markets tillaggsisolering and facade-system expertise, which indicates strong comfort with building-envelope problem solving and new system adoption.","lat":55.6155616,"lng":13.0936905},{"priority":27,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Fuktskadecenterskåne","region":"Lund / Skåne","city":"Lund","municipality":"Lund Municipality","areaGroup":"Skane","street":"Östra Vallgatan 35E","postcode":"","email":"info@fuktskadecenter.se","phone":"070-792 71 64","website":"https://www.fuktskadecenterskane.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Fuktskadecentersk%C3%A5ne%2C%20%C3%96stra%20Vallgatan%2035E%2C%20Lund%2C%20Sweden","what":"Moisture-damage remediation specialist offering inspection, remedial measures and building-condition services tied to damp-related problems.","reason":"Good SkamoWall-fit installer lead because the business is built around damp-damage trigger cases and can be a strong route into projects where internal wall systems are needed to solve moisture and indoor-climate issues.","lat":55.7020821,"lng":13.200866},{"priority":28,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Fasadkraft Väst AB","region":"Göteborg metro / Västra Götaland","city":"Mölnlycke","municipality":"Harryda Municipality","areaGroup":"Vastra Gotaland","street":"Aspgården 43","postcode":"","email":"info@fasadkraft.se","phone":"0735-39 41 68","website":"https://www.fasadkraft.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Fasadkraft%20V%C3%A4st%20AB%2C%20Aspg%C3%A5rden%2043%2C%20M%C3%B6lnlycke%2C%20Sweden","what":"Facade and masonry contractor focused on facade renovation, plastering, brickwork, balconies and related envelope upgrades.","reason":"Included because the company clearly positions around facade renovation and masonry know-how, which makes it a plausible first-wave installer target for a technically supported SkamoWall rollout in the Gothenburg market.","lat":57.6637926,"lng":12.1014654},{"priority":29,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Johns Bygg \u0026 Fasad AB","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"von Utfallsgatan 14","postcode":"415 05","email":"info@johns.se","phone":"033 20 57 00","website":"https://johns.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Johns%20Bygg%20%26%20Fasad%20AB%2C%20von%20Utfallsgatan%2014%2C%20415%2005%2C%20G%C3%B6teborg%2C%20Sweden","what":"Established facade contractor delivering facade work, reinforcement and related building-envelope services across Sweden.","reason":"Included because it is a real specialist facade contractor with a published Gothenburg office, strong envelope orientation and a technical delivery profile that could support product training and reference projects.","lat":57.7262614,"lng":12.0179546},{"priority":30,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"FC Mureri AB","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Marieholmsgatan 86","postcode":"415 02","email":"info@fcmureri.se","phone":"031-330 23 85","website":"https://fcmureri.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=FC%20Mureri%20AB%2C%20Marieholmsgatan%2086%2C%20415%2002%2C%20G%C3%B6teborg%2C%20Sweden","what":"Professional masonry contractor in Gothenburg with clear focus on brickwork, plastering and related facade execution.","reason":"Strong practical installer prospect because the company is tightly aligned with masonry and plaster execution, which is much closer to real SkamoWall installation logic than a broad general contractor profile.","lat":57.7257561,"lng":11.9955272},{"priority":31,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Glose Murning \u0026 Puts AB","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Marieholmsgatan 10B","postcode":"415 02","email":"","phone":"070-538 04 19","website":"https://glosemurning.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Glose%20Murning%20%26%20Puts%20AB%2C%20Marieholmsgatan%2010B%2C%20415%2002%2C%20G%C3%B6teborg%2C%20Sweden","what":"Masonry and plaster contractor serving Gothenburg with facade-related execution and repair work.","reason":"Included because it is a small specialist contractor with direct muring and plaster skills, which makes it a credible early installation partner for pilot projects and hands-on technical support.","lat":57.7263561,"lng":11.9963272},{"priority":32,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"PSAB","region":"Göteborg metro / Västra Götaland","city":"Västra Frölunda","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"E A Rosengrens Gata 5","postcode":"421 31","email":"info@psab.se","phone":"031-49 09 95","website":"https://psab.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=PSAB%2C%20E%20A%20Rosengrens%20Gata%205%2C%20421%2031%2C%20V%C3%A4stra%20Fr%C3%B6lunda%2C%20Sweden","what":"Facade, balcony and concrete-renovation contractor with building-envelope restoration capability.","reason":"Included because the company works on the kind of existing-building restoration problems that often create a route into internal wall-system decisions, making it relevant for SkamoWall sales conversations in the Gothenburg area.","lat":57.6585952,"lng":11.9362396},{"priority":33,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Coplan Service Group AB","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Hulda Lindgrens Gata 3","postcode":"421 31","email":"","phone":"076-290 94 27","website":"https://www.coplan.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Coplan%20Service%20Group%20AB%2C%20Hulda%20Lindgrens%20Gata%203%2C%20421%2031%2C%20G%C3%B6teborg%2C%20Sweden","what":"Renovation contractor offering facade, basement, roof, laundry-room and apartment upgrade projects.","reason":"Included because the company is active in the kind of practical refurbishment work where damp, basement and interior-wall upgrade cases can emerge, giving SkamoWall a realistic entry path.","lat":57.6569568,"lng":11.9437299},{"priority":34,"tierCode":"A2","tierLabel":"Installer","group":"installer","category":"Installer","country":"Sweden","name":"Trä \u0026 Mur Kompaniet AB","region":"Göteborg metro / Västra Götaland","city":"Kållered","municipality":"Molndal Municipality","areaGroup":"Vastra Gotaland","street":"Ekenleden 13 A","postcode":"428 36","email":"info@traomur.se","phone":"076 - 100 98 87","website":"https://www.traomur.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Tr%C3%A4%20%26%20Mur%20Kompaniet%20AB%2C%20Ekenleden%2013%20A%2C%20428%2036%2C%20K%C3%A5llered%2C%20Sweden","what":"Building and facade contractor delivering brick, masonry, plaster, balcony, roof and window renovation projects around Gothenburg.","reason":"Included because the company explicitly markets facade renovation and building-envelope know-how, which makes it a realistic installer partner for first SkamoWall reference projects in the Gothenburg region.","lat":57.6071034,"lng":12.0426989},{"priority":35,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Lunds Kommuns Fastighets AB (LKF)","region":"Lund / Skåne","city":"Lund","municipality":"Lund Municipality","areaGroup":"Skane","street":"Brunnshögsgatan 39","postcode":"","email":"kundcenter@lkf.se","phone":"046-35 85 00","website":"https://www.lkf.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Lunds%20Kommuns%20Fastighets%20AB%20(LKF)%2C%20Brunnsh%C3%B6gsgatan%2039%2C%20Lund%2C%20Sweden","what":"Municipal housing company in Lund managing rental housing, maintenance, customer service and refurbishment planning across the city.","reason":"Included because Lund is a priority southern market and LKF gives direct access to existing housing stock where moisture, comfort and energy-upgrade issues can create future SkamoWall demand.","lat":55.7187866,"lng":13.2338251},{"priority":36,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"AF Bostäder","region":"Lund / Skåne","city":"Lund","municipality":"Lund Municipality","areaGroup":"Skane","street":"Tunavägen 39 C","postcode":"","email":"info@afbostader.se","phone":"+46 46 19 15 00","website":"https://www.afbostader.se/en/contact-us/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AF%20Bost%C3%A4der%2C%20Tunav%C3%A4gen%2039%20C%2C%20Lund%2C%20Sweden","what":"Student-housing organization in Lund operating large rental stock, service operations and ongoing property maintenance.","reason":"Included because it broadens the Lund buyer landscape and represents dense existing residential stock with recurring indoor-climate and refurbishment needs relevant to SkamoWall conversations.","lat":55.7098656,"lng":13.2162889},{"priority":37,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Gårdstensbostäder AB","region":"Göteborg / Västra Götaland","city":"Angered","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Salviatorget 3","postcode":"","email":"gbg@gardstensbostader.se","phone":"031-332 60 00","website":"https://gardstensbostader.se/kontakt/omradeskontor/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=G%C3%A5rdstensbost%C3%A4der%20AB%2C%20Salviatorget%203%2C%20Angered%2C%20Sweden","what":"Municipal housing company focused on rental housing, area management and property operations in the Gardssten district of Gothenburg.","reason":"Included because it adds another Gothenburg housing owner with relevant renovation exposure and broadens access beyond the largest city-wide housing companies already in the file.","lat":57.8042593,"lng":12.0327487},{"priority":38,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"AB TrelleborgsHem","region":"Trelleborg / Skåne","city":"Trelleborg","municipality":"Trelleborg Municipality","areaGroup":"Skane","street":"Kapellgatan 18","postcode":"231 45","email":"bobutik@trelleborgshem.se","phone":"0410-190 50","website":"https://www.trelleborgshem.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=AB%20TrelleborgsHem%2C%20Kapellgatan%2018%2C%20231%2045%2C%20Trelleborg%2C%20Sweden","what":"Municipal housing company in Trelleborg managing rental housing, local housing development and ongoing property operations.","reason":"Included because it improves southern-Skåne spread beyond Malmö and gives access to additional municipal housing stock that can surface moisture and comfort-led retrofit opportunities.","lat":55.3715262,"lng":13.1647097},{"priority":39,"tierCode":"B1","tierLabel":"Housing association","group":"housing","category":"Housing association","country":"Sweden","name":"Bostadsbolaget (Göteborgs stads bostadsaktiebolag)","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Engelbrektsgatan 69","postcode":"","email":"info@bostadsbolaget.se","phone":"031-731 50 00","website":"https://bostadsbolaget.se/","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Bostadsbolaget%20(G%C3%B6teborgs%20stads%20bostadsaktiebolag)%2C%20Engelbrektsgatan%2069%2C%20G%C3%B6teborg%2C%20Sweden","what":"Large Gothenburg housing company managing rental housing, tenant services, maintenance and refurbishment activity.","reason":"Included because it expands the Gothenburg housing-owner set and is a credible long-term buyer for SkamoWall once local installer references are established.","lat":57.7012302,"lng":11.9836197},{"priority":40,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Optimera Göteborg","region":"Göteborg / Västra Götaland","city":"Göteborg","municipality":"Gothenburg Municipality","areaGroup":"Vastra Gotaland","street":"Marieholmsgatan 14","postcode":"415 02","email":"goteborg@optimera.se","phone":"031-707 25 00","website":"https://www.optimera.se/butiker/15","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Optimera%20G%C3%B6teborg%2C%20Marieholmsgatan%2014%2C%20415%2002%2C%20G%C3%B6teborg%2C%20Sweden","what":"Trade-oriented building-material merchant branch serving Gothenburg with heavy building materials, interiors and site products.","reason":"Included because merchant access in Gothenburg can support installer discovery, future stocking discussions and practical rollout support for SkamoWall.","lat":57.7257561,"lng":11.9955272},{"priority":41,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Optimera Lund","region":"Lund / Skåne","city":"Lund","municipality":"Lund Municipality","areaGroup":"Skane","street":"Skiffervägen 26A","postcode":"224 78","email":"lund@optimera.se","phone":"046-19 60 50","website":"https://www.optimera.se/butiker/27","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Optimera%20Lund%2C%20Skifferv%C3%A4gen%2026A%2C%20224%2078%2C%20Lund%2C%20Sweden","what":"Trade branch in Lund supplying construction materials, building products and contractor support to the local market.","reason":"Included because Lund distribution coverage strengthens the southern Sweden rollout path and gives a practical merchant route for installer introductions and local availability.","lat":55.692636,"lng":13.2230905},{"priority":42,"tierCode":"C1","tierLabel":"Distributor","group":"distributor","category":"Distributor / merchant","country":"Sweden","name":"Optimera Jägersro","region":"Malmö / Skåne","city":"Malmö","municipality":"Malmo Municipality","areaGroup":"Skane","street":"Skrittgatan 1","postcode":"213 77","email":"jagersro@optimera.se","phone":"040-38 18 00","website":"https://www.optimera.se/butiker/13","googleMaps":"https://www.google.com/maps/search/?api=1\u0026query=Optimera%20J%C3%A4gersro%2C%20Skrittgatan%201%2C%20213%2077%2C%20Malm%C3%B6%2C%20Sweden","what":"Large trade branch in Malmö Jägersro supplying building materials, tools and local stock for professional contractors.","reason":"Included because a strong Malmö merchant touchpoint can help with installer referrals, product availability conversations and practical route-to-market support for SkamoWall.","lat":55.5683405,"lng":13.0700414}];
+    const colors = {
+      installer: '#eb7a00',
+      housing: '#18864b',
+      distributor: '#2563eb',
+      other: '#64748b'
+    };
+
+    const state = {
+      installer: true,
+      housing: true,
+      distributor: true,
+      area: '',
+      search: ''
+    };
+
+    const swedenBounds = L.latLngBounds([[55.0, 10.5], [69.3, 24.9]]);
+    const swedenGeoJsonUrl = 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/SWE.geo.json';
+
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: false,
+      scrollWheelZoom: true,
+      maxBounds: swedenBounds,
+      maxBoundsViscosity: 1.0
+    });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.control.attribution({ position: 'bottomright', prefix: false }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
+
+    const layers = {
+      installer: L.layerGroup().addTo(map),
+      housing: L.layerGroup().addTo(map),
+      distributor: L.layerGroup().addTo(map)
+    };
+
+    const leadList = document.getElementById('lead-list');
+    const areaFilter = document.getElementById('filter-area');
+    const nameFilter = document.getElementById('filter-name');
+    const detailPanel = document.getElementById('detail-panel');
+    const detailContent = document.getElementById('detail-content');
+    const detailBack = document.getElementById('detail-back');
+    const markerLookup = new Map();
+    let activeName = null;
+
+    function normalizeText(value) {
+      return (value || '')
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function withinSwedenBounds(lat, lng) {
+      return lat >= 55.0 && lat <= 69.3 && lng >= 10.5 && lng <= 24.9;
+    }
+
+    function addSwedenMask(geojson) {
+      const geometry = geojson.type === 'Feature' ? geojson.geometry : geojson;
+      const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+      const worldRing = [[85, -180], [85, 180], [-85, 180], [-85, -180]];
+      const holes = polygons.map((polygon) => polygon[0].map(([lng, lat]) => [lat, lng]));
+
+      L.polygon([worldRing, ...holes], {
+        stroke: false,
+        fillColor: '#c7cdd4',
+        fillOpacity: 0.58,
+        interactive: false
+      }).addTo(map);
+
+      L.geoJSON(geojson, {
+        interactive: false,
+        style: {
+          color: '#8d9ba8',
+          weight: 2,
+          fillColor: '#ffffff',
+          fillOpacity: 0.08
+        }
+      }).addTo(map);
+
+      Object.values(layers).forEach((layer) => layer.bringToFront());
+    }
+
+    fetch(swedenGeoJsonUrl)
+      .then((response) => response.json())
+      .then((geojson) => addSwedenMask(geojson))
+      .catch(() => {});
+
+    function badgeClass(tierCode) {
+      if (tierCode === 'A1') return 'a1';
+      if (tierCode === 'A2') return 'a2';
+      if (tierCode === 'B1') return 'b1';
+      return 'c1';
+    }
+
+    function markerRadius(lead) {
+      if (lead.tierCode === 'A1') return 10;
+      if (lead.group === 'installer') return 8;
+      return 7;
+    }
+
+    function detailHtml(lead) {
+      const contact = [lead.street, lead.postcode + ' ' + lead.city].filter(Boolean).join(', ');
+      const email = lead.email ? '<div class="detail-block"><b>Email</b><a class="detail-link" href="mailto:' + lead.email + '">' + lead.email + '</a></div>' : '';
+      const phone = lead.phone ? '<div class="detail-block"><b>Phone</b>' + lead.phone + '</div>' : '';
+      const maps = lead.googleMaps ? '<div class="detail-block"><b>Google Maps</b><a class="detail-link" href="' + lead.googleMaps + '" target="_blank" rel="noreferrer">Open in Google Maps</a></div>' : '';
+
+      return [
+        '<div class="detail-chip ' + badgeClass(lead.tierCode) + '">' + lead.tierLabel + '</div>',
+        '<div class="detail-title">' + lead.name + '</div>',
+        '<div class="detail-meta">' + lead.category + '<br>' + lead.city + ', ' + lead.region + '</div>',
+        '<div class="detail-block"><b>Region</b>' + lead.region + '</div>',
+        '<div class="detail-block"><b>Address</b>' + contact + '</div>',
+        email,
+        phone,
+        '<div class="detail-block"><b>Website</b><a class="detail-link" href="' + lead.website + '" target="_blank" rel="noreferrer">' + lead.website + '</a></div>',
+        maps,
+        '<div class="detail-block"><b>What they do</b>' + lead.what + '</div>',
+        '<div class="detail-block"><b>Why prioritised</b>' + lead.reason + '</div>'
+      ].join('');
+    }
+
+    function visibleLeads() {
+      const activeArea = normalizeText(state.area);
+      const activeSearch = normalizeText(state.search);
+
+      return leads.filter((lead) => {
+        if (!state[lead.group]) return false;
+        if (!withinSwedenBounds(lead.lat, lead.lng)) return false;
+        if (lead.country !== 'Sweden') return false;
+        if (activeArea && normalizeText(lead.areaGroup) !== activeArea) return false;
+        if (activeSearch && !normalizeText(lead.name).includes(activeSearch)) return false;
+        return true;
+      });
+    }
+
+    function populateAreaFilter() {
+      const areas = Array.from(new Set(
+        leads
+          .filter((lead) => lead.country === 'Sweden' && lead.areaGroup)
+          .map((lead) => lead.areaGroup)
+      )).sort((a, b) => a.localeCompare(b, 'sv', { sensitivity: 'base' }));
+
+      areaFilter.innerHTML = '<option value="">All areas</option>';
+      areas.forEach((area) => {
+        const option = document.createElement('option');
+        option.value = area;
+        option.textContent = area;
+        areaFilter.appendChild(option);
+      });
+    }
+
+    function scrollActiveItemIntoView() {
+      const activeItem = leadList.querySelector('.lead-item.active');
+      if (activeItem) {
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function openLeadDetail(lead, options = {}) {
+      activeName = lead.name;
+      detailContent.innerHTML = detailHtml(lead);
+      detailPanel.classList.add('open');
+      detailPanel.setAttribute('aria-hidden', 'false');
+      renderList();
+
+      if (options.flyTo !== false) {
+        map.flyTo([lead.lat, lead.lng], lead.group === 'installer' ? 8 : 9, { duration: 0.45 });
+      }
+    }
+
+    function closeLeadDetail(scrollToList = true) {
+      detailPanel.classList.remove('open');
+      detailPanel.setAttribute('aria-hidden', 'true');
+      if (scrollToList) {
+        scrollActiveItemIntoView();
+      }
+    }
+
+    function fitLeadBounds(bounds, padding) {
+      if (!bounds.length) {
+        map.fitBounds(swedenBounds, { padding: [24, 24] });
+        return;
+      }
+
+      map.fitBounds(bounds, { padding });
+      map.panInsideBounds(swedenBounds, { animate: false });
+    }
+
+    function renderMarkers() {
+      Object.values(layers).forEach((layer) => layer.clearLayers());
+      markerLookup.clear();
+      const bounds = [];
+
+      visibleLeads().forEach((lead) => {
+        const marker = L.circleMarker([lead.lat, lead.lng], {
+          radius: markerRadius(lead),
+          color: lead.tierCode === 'A1' ? '#6f4c00' : colors[lead.group],
+          weight: lead.tierCode === 'A1' ? 3 : 2,
+          fillColor: lead.tierCode === 'A1' ? '#ffc857' : colors[lead.group],
+          fillOpacity: 0.8
+        });
+
+        marker.on('click', () => {
+          openLeadDetail(lead, { flyTo: false });
+        });
+
+        marker.addTo(layers[lead.group]);
+        markerLookup.set(lead.name, marker);
+        bounds.push([lead.lat, lead.lng]);
+      });
+
+      fitLeadBounds(bounds, [36, 36]);
+    }
+
+    function renderList() {
+      const visible = visibleLeads();
+      leadList.innerHTML = '';
+
+      if (!visible.length) {
+        leadList.innerHTML = '<div class="lead-empty">No leads match the current area and name filters.</div>';
+        return;
+      }
+
+      visible.forEach((lead) => {
+        const item = document.createElement('div');
+        item.className = 'lead-item' + (activeName === lead.name ? ' active' : '');
+        item.innerHTML = [
+          '<div class="lead-top">',
+          '<div class="badge ' + badgeClass(lead.tierCode) + '">' + lead.tierLabel + '</div>',
+          '</div>',
+          '<div class="lead-name">' + lead.name + '</div>',
+          '<div class="lead-meta">' + lead.category + '<br>' + lead.city + ', ' + lead.region + '</div>'
+        ].join('');
+
+        item.addEventListener('click', () => {
+          openLeadDetail(lead, { flyTo: true });
+        });
+
+        leadList.appendChild(item);
+      });
+    }
+
+    function rerender() {
+      const stillVisible = visibleLeads().some((lead) => lead.name === activeName);
+      if (!stillVisible) {
+        closeLeadDetail(false);
+      }
+      renderMarkers();
+      renderList();
+    }
+
+    document.getElementById('toggle-installers').addEventListener('change', (event) => {
+      state.installer = event.target.checked;
+      rerender();
+    });
+
+    document.getElementById('toggle-housing').addEventListener('change', (event) => {
+      state.housing = event.target.checked;
+      rerender();
+    });
+
+    document.getElementById('toggle-distributors').addEventListener('change', (event) => {
+      state.distributor = event.target.checked;
+      rerender();
+    });
+
+    areaFilter.addEventListener('change', (event) => {
+      state.area = event.target.value;
+      rerender();
+    });
+
+    nameFilter.addEventListener('input', (event) => {
+      state.search = event.target.value;
+      rerender();
+    });
+
+    detailBack.addEventListener('click', () => {
+      closeLeadDetail(true);
+    });
+
+    populateAreaFilter();
+    rerender();
+  </script>
+</body>
+</html>
