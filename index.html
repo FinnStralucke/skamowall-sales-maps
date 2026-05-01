@@ -1,180 +1,231 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SkamoWall Sales Maps</title>
-  <style>
-    :root {
-      --orange: #eb7a00;
-      --green: #18864b;
-      --ink: #17202a;
-      --muted: #5f6c7b;
-      --line: #d7dee6;
-      --bg: linear-gradient(180deg, #fff7ef 0%, #eef3f6 100%);
-      --panel: #ffffff;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      min-height: 100vh;
-    }
-
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 56px 20px 72px;
-    }
-
-    .kicker {
-      color: var(--orange);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: 40px;
-      line-height: 1.05;
-    }
-
-    .intro {
-      max-width: 720px;
-      font-size: 18px;
-      line-height: 1.55;
-      color: var(--muted);
-      margin-bottom: 30px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .tag.uk {
-      background: rgba(235, 122, 0, 0.12);
-      color: #8a4600;
-    }
-
-    .tag.nl {
-      background: rgba(24, 134, 75, 0.12);
-      color: #15643a;
-    }
-
-    .tag.se {
-      background: rgba(37, 99, 235, 0.12);
-      color: #1d4ed8;
-    }
-
-    h2 {
-      margin: 0 0 8px;
-      font-size: 24px;
-    }
-
-    p {
-      margin: 0 0 18px;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    a.button {
-      display: inline-block;
-      text-decoration: none;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 700;
-      border: 1px solid var(--line);
-      color: var(--ink);
-      background: #fff;
-    }
-
-    a.button.primary {
-      background: var(--orange);
-      border-color: var(--orange);
-      color: #fff;
-    }
-
-    .footer {
-      margin-top: 28px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-  </style>
+  <title>DACH Ofenmarkt Sales Map</title>
+  <meta
+    name="description"
+    content="Interaktive Sales Map fuer Hersteller, Ofenbauer und Vertriebsprioritaeten im DACH-Ofenmarkt."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <div class="kicker">SkamoWall</div>
-    <h1>Sales Map Hub</h1>
-    <div class="intro">
-      Direct web access to the interactive SkamoWall lead maps for the United Kingdom, the Amsterdam-region Netherlands market, and South Sweden.
+  <div class="site-frame">
+    <header class="topbar">
+      <div class="topbar__brand">
+        <span class="topbar__badge">Skamol DACH</span>
+        <a class="topbar__title" href="#top">DACH Ofenmarkt Sales Map</a>
+      </div>
+
+      <div class="topbar__summary" aria-label="KPI-Zeile">
+        <span class="topbar__summary-item">
+          <span class="topbar__summary-label">Layer:</span>
+          <strong class="topbar__summary-value" id="badgeLayerName">Top Targets</strong>
+        </span>
+        <span class="topbar__separator">|</span>
+        <span class="topbar__summary-item">
+          <strong class="topbar__summary-value" id="statFiltered">0</strong>
+          <span class="topbar__summary-label">Firmen</span>
+        </span>
+        <span class="topbar__separator">|</span>
+        <span class="topbar__summary-item">
+          <strong class="topbar__summary-value" id="statManufacturers">0</strong>
+          <span class="topbar__summary-label">Hersteller</span>
+        </span>
+        <span class="topbar__separator">|</span>
+        <span class="topbar__summary-item">
+          <strong class="topbar__summary-value" id="statOfenbauer">0</strong>
+          <span class="topbar__summary-label">Ofenbauer</span>
+        </span>
+      </div>
+
+      <button
+        class="info-button"
+        id="infoButton"
+        type="button"
+        aria-label="Legende oeffnen"
+        aria-haspopup="dialog"
+        aria-controls="legendModal"
+        aria-expanded="false"
+      >
+        i
+      </button>
+    </header>
+
+    <div class="legend-modal" id="legendModal" hidden>
+      <button
+        class="legend-modal__backdrop"
+        type="button"
+        data-legend-close
+        aria-label="Legende schliessen"
+      ></button>
+      <aside class="legend-modal__panel" role="dialog" aria-modal="true" aria-labelledby="legendTitle">
+        <div class="legend-modal__head">
+          <h2 id="legendTitle">Legende</h2>
+          <button
+            class="legend-modal__close"
+            id="legendCloseButton"
+            type="button"
+            aria-label="Legende schliessen"
+          >
+            x
+          </button>
+        </div>
+        <ul class="legend-modal__list">
+          <li><span class="legend-dot legend-dot--rot"></span> Rot: Hersteller A / High Fit</li>
+          <li><span class="legend-dot legend-dot--gelb"></span> Gelb: Hersteller B</li>
+          <li><span class="legend-dot legend-dot--grau"></span> Grau: Hersteller C</li>
+          <li><span class="legend-dot legend-dot--blau"></span> Blau: Ofenbauer high</li>
+          <li><span class="legend-dot legend-dot--hellblau"></span> Hellblau: Ofenbauer medium</li>
+          <li><span class="legend-dot legend-dot--hellgrau"></span> Hellgrau: Ofenbauer low</li>
+          <li><span class="legend-dot legend-dot--outline"></span> Markergroesse: Prioritaet / Relevanz</li>
+        </ul>
+      </aside>
     </div>
 
-    <div class="grid">
-      <section class="card">
-        <div class="tag uk">United Kingdom</div>
-        <h2>UK Priority Map</h2>
-        <p>Installer-heavy prospect map with housing associations and distributors layered around the strongest early-adopter targets.</p>
-        <div class="actions">
-          <a class="button primary" href="./uk-map.html">Open UK Map</a>
+    <main id="top">
+      <section class="controls-panel" id="filtersPanel" aria-label="Filter und Suchlogik">
+        <div class="controls-panel__head">
+          <div>
+            <p class="section-kicker">Vertrieb</p>
+            <h2>Filter</h2>
+          </div>
+        </div>
+
+        <div class="filter-strip">
+          <section class="filter-unit filter-unit--layer">
+            <label class="control-label control-label--compact">Layer</label>
+            <div class="layer-switch-wrap" id="layerSwitchWrap">
+              <div class="layer-switch" role="group" aria-label="Datenebene umschalten">
+                <button class="layer-button is-active" data-layer="top" type="button">Top Targets</button>
+                <button class="layer-button" data-layer="filtered" type="button">Relevante Betriebe</button>
+                <button class="layer-button" data-layer="full" type="button">Full Market</button>
+              </div>
+              <div class="layer-tooltip" id="layerTooltip" role="tooltip" aria-hidden="true"></div>
+            </div>
+          </section>
+
+          <section class="filter-unit">
+            <label class="control control--compact" for="companyTypeFilter">
+              <span class="control-label control-label--compact">Typ</span>
+              <select id="companyTypeFilter">
+                <option value="">Alle</option>
+                <option value="manufacturer">Hersteller</option>
+                <option value="ofenbauer">Ofenbauer</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="filter-unit">
+            <label class="control control--compact" for="countryFilter">
+              <span class="control-label control-label--compact">Land</span>
+              <select id="countryFilter">
+                <option value="">Alle Laender</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="filter-unit">
+            <label class="control control--compact" for="salesPriorityFilter">
+              <span class="control-label control-label--compact">Priority</span>
+              <select id="salesPriorityFilter">
+                <option value="">Alle</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="filter-unit">
+            <label class="control control--compact" for="topTargetFilter">
+              <span class="control-label control-label--compact">Top Target</span>
+              <select id="topTargetFilter">
+                <option value="">Alle</option>
+                <option value="true">Ja</option>
+                <option value="false">Nein</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="filter-unit filter-unit--search">
+            <label class="control control--compact control--search" for="searchInput">
+              <span class="control-label control-label--compact">Suche</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="z. B. Spartherm, Hamburg, Kamineinsaetze"
+              >
+            </label>
+            <div class="action-row action-row--compact">
+              <button id="fitBoundsButton" class="button button--primary" type="button">Treffer auf Karte</button>
+              <button id="resetFiltersButton" class="button button--secondary" type="button">Filter zuruecksetzen</button>
+            </div>
+          </section>
         </div>
       </section>
 
-      <section class="card">
-        <div class="tag nl">Netherlands</div>
-        <h2>Amsterdam Focus Map</h2>
-        <p>Amsterdam-region lead map with installers, housing associations and distributors presented in the same interactive format.</p>
-        <div class="actions">
-          <a class="button primary" href="./amsterdam-map.html">Open NL Map</a>
-        </div>
-      </section>
+      <section class="workspace">
+        <aside class="sidebar" id="resultsPanel">
+          <section class="panel panel--results">
+            <div class="panel__head">
+              <div>
+                <p class="section-kicker">Trefferliste</p>
+                <h2>Firmen im aktuellen Fokus</h2>
+              </div>
+              <div class="panel__badge" id="resultCount">0 Treffer</div>
+            </div>
+            <p class="panel__text" id="resultMeta">Lade Daten ...</p>
+            <div class="list-block" id="resultsList" aria-live="polite"></div>
+          </section>
+        </aside>
 
-      <section class="card">
-        <div class="tag se">Sweden</div>
-        <h2>South Sweden Map</h2>
-        <p>South Sweden lead map with installer focus, grouped-area filtering, housing associations, distributors, and a downloadable Excel lead sheet.</p>
-        <div class="actions">
-          <a class="button primary" href="./sweden-map.html">Open Sweden Map</a>
-          <a class="button" href="./sweden-leads.xlsx">Download Excel</a>
-        </div>
+        <section class="map-panel" id="marketMap">
+          <div class="map-panel__head">
+            <div>
+              <p class="section-kicker">Kartenansicht</p>
+              <h2>DACH Sales Map</h2>
+            </div>
+          </div>
+          <div class="map-canvas-wrap">
+            <div class="map-legend-compact" aria-label="Kompakte Markerlegende">
+              <ul>
+                <li><span class="legend-dot legend-dot--rot"></span> Hersteller A / High Fit</li>
+                <li><span class="legend-dot legend-dot--gelb"></span> Hersteller B</li>
+                <li><span class="legend-dot legend-dot--grau"></span> Hersteller C</li>
+                <li><span class="legend-dot legend-dot--blau"></span> Ofenbauer high</li>
+                <li><span class="legend-dot legend-dot--hellblau"></span> Ofenbauer medium</li>
+                <li><span class="legend-dot legend-dot--hellgrau"></span> Ofenbauer low</li>
+              </ul>
+            </div>
+            <div id="map" aria-label="Interaktive Karte fuer DACH-Hersteller und Ofenbauer"></div>
+          </div>
+        </section>
       </section>
-    </div>
+    </main>
+  </div>
 
-    <div class="footer">
-      Published via GitHub Pages for simple browser access and easy sharing.
-    </div>
-  </main>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
