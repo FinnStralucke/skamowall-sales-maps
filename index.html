@@ -6,7 +6,7 @@
   <title>DACH Ofenmarkt Sales Map</title>
   <meta
     name="description"
-    content="Interaktive Sales Map fuer Hersteller, Ofenbauer und Vertriebsprioritaeten im DACH-Ofenmarkt."
+    content="Interaktive Sales Map für Hersteller, Ofenbauer und Vertriebsprioritäten im DACH-Ofenmarkt."
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,39 +32,41 @@
         <a class="topbar__title" href="#top">DACH Ofenmarkt Sales Map</a>
       </div>
 
-      <div class="topbar__summary" aria-label="KPI-Zeile">
-        <span class="topbar__summary-item">
-          <span class="topbar__summary-label">Layer:</span>
-          <strong class="topbar__summary-value" id="badgeLayerName">Top Targets</strong>
-        </span>
-        <span class="topbar__separator">|</span>
-        <span class="topbar__summary-item">
-          <strong class="topbar__summary-value" id="statFiltered">0</strong>
-          <span class="topbar__summary-label">Firmen</span>
-        </span>
-        <span class="topbar__separator">|</span>
-        <span class="topbar__summary-item">
-          <strong class="topbar__summary-value" id="statManufacturers">0</strong>
-          <span class="topbar__summary-label">Hersteller</span>
-        </span>
-        <span class="topbar__separator">|</span>
-        <span class="topbar__summary-item">
-          <strong class="topbar__summary-value" id="statOfenbauer">0</strong>
-          <span class="topbar__summary-label">Ofenbauer</span>
-        </span>
-      </div>
+      <div class="topbar__actions">
+        <div class="topbar__summary" aria-label="KPI-Zeile">
+          <span class="topbar__summary-item">
+            <span class="topbar__summary-label">Layer:</span>
+            <strong class="topbar__summary-value" id="badgeLayerName">Top Targets</strong>
+          </span>
+          <span class="topbar__separator">|</span>
+          <span class="topbar__summary-item">
+            <strong class="topbar__summary-value" id="statFiltered">0</strong>
+            <span class="topbar__summary-label">Firmen</span>
+          </span>
+          <span class="topbar__separator">|</span>
+          <span class="topbar__summary-item">
+            <strong class="topbar__summary-value" id="statManufacturers">0</strong>
+            <span class="topbar__summary-label">Hersteller</span>
+          </span>
+          <span class="topbar__separator">|</span>
+          <span class="topbar__summary-item">
+            <strong class="topbar__summary-value" id="statOfenbauer">0</strong>
+            <span class="topbar__summary-label">Ofenbauer</span>
+          </span>
+        </div>
 
-      <button
-        class="info-button"
-        id="infoButton"
-        type="button"
-        aria-label="Legende oeffnen"
-        aria-haspopup="dialog"
-        aria-controls="legendModal"
-        aria-expanded="false"
-      >
-        i
-      </button>
+        <button
+          class="info-button"
+          id="infoButton"
+          type="button"
+          aria-label="Info öffnen"
+          aria-haspopup="dialog"
+          aria-controls="legendModal"
+          aria-expanded="false"
+        >
+          ℹ
+        </button>
+      </div>
     </header>
 
     <div class="legend-modal" id="legendModal" hidden>
@@ -72,18 +74,18 @@
         class="legend-modal__backdrop"
         type="button"
         data-legend-close
-        aria-label="Legende schliessen"
+        aria-label="Legende schließen"
       ></button>
       <aside class="legend-modal__panel" role="dialog" aria-modal="true" aria-labelledby="legendTitle">
         <div class="legend-modal__head">
-          <h2 id="legendTitle">Legende</h2>
+          <h2 id="legendTitle">Legende &amp; Prioritäten</h2>
           <button
             class="legend-modal__close"
             id="legendCloseButton"
             type="button"
-            aria-label="Legende schliessen"
+            aria-label="Legende schließen"
           >
-            x
+            ×
           </button>
         </div>
         <ul class="legend-modal__list">
@@ -93,7 +95,8 @@
           <li><span class="legend-dot legend-dot--blau"></span> Blau: Ofenbauer high</li>
           <li><span class="legend-dot legend-dot--hellblau"></span> Hellblau: Ofenbauer medium</li>
           <li><span class="legend-dot legend-dot--hellgrau"></span> Hellgrau: Ofenbauer low</li>
-          <li><span class="legend-dot legend-dot--outline"></span> Markergroesse: Prioritaet / Relevanz</li>
+          <li><span class="legend-dot legend-dot--outline"></span> Markergröße: Priorität / Relevanz</li>
+          <li><span class="legend-dot legend-dot--outline"></span> A = strategisch, B = relevant, C = Beobachtung</li>
         </ul>
       </aside>
     </div>
@@ -102,7 +105,6 @@
       <section class="controls-panel" id="filtersPanel" aria-label="Filter und Suchlogik">
         <div class="controls-panel__head">
           <div>
-            <p class="section-kicker">Vertrieb</p>
             <h2>Filter</h2>
           </div>
         </div>
@@ -135,14 +137,14 @@
             <label class="control control--compact" for="countryFilter">
               <span class="control-label control-label--compact">Land</span>
               <select id="countryFilter">
-                <option value="">Alle Laender</option>
+                <option value="">Alle Länder</option>
               </select>
             </label>
           </section>
 
           <section class="filter-unit">
             <label class="control control--compact" for="salesPriorityFilter">
-              <span class="control-label control-label--compact">Priority</span>
+              <span class="control-label control-label--compact">Priorität</span>
               <select id="salesPriorityFilter">
                 <option value="">Alle</option>
                 <option value="A">A</option>
@@ -169,12 +171,12 @@
               <input
                 id="searchInput"
                 type="search"
-                placeholder="z. B. Spartherm, Hamburg, Kamineinsaetze"
+                placeholder="z. B. Spartherm, Hamburg, Kamineinsätze"
               >
             </label>
             <div class="action-row action-row--compact">
               <button id="fitBoundsButton" class="button button--primary" type="button">Treffer auf Karte</button>
-              <button id="resetFiltersButton" class="button button--secondary" type="button">Filter zuruecksetzen</button>
+              <button id="resetFiltersButton" class="button button--secondary" type="button">Filter zurücksetzen</button>
             </div>
           </section>
         </div>
@@ -185,12 +187,12 @@
           <section class="panel panel--results">
             <div class="panel__head">
               <div>
-                <p class="section-kicker">Trefferliste</p>
-                <h2>Firmen im aktuellen Fokus</h2>
+                <p class="section-kicker">Treffer</p>
+                <h2>Trefferliste</h2>
               </div>
               <div class="panel__badge" id="resultCount">0 Treffer</div>
             </div>
-            <p class="panel__text" id="resultMeta">Lade Daten ...</p>
+            <p class="panel__text" id="resultMeta">Lade Daten …</p>
             <div class="list-block" id="resultsList" aria-live="polite"></div>
           </section>
         </aside>
@@ -198,7 +200,7 @@
         <section class="map-panel" id="marketMap">
           <div class="map-panel__head">
             <div>
-              <p class="section-kicker">Kartenansicht</p>
+              <p class="section-kicker">Karte</p>
               <h2>DACH Sales Map</h2>
             </div>
           </div>
@@ -213,7 +215,7 @@
                 <li><span class="legend-dot legend-dot--hellgrau"></span> Ofenbauer low</li>
               </ul>
             </div>
-            <div id="map" aria-label="Interaktive Karte fuer DACH-Hersteller und Ofenbauer"></div>
+            <div id="map" aria-label="Interaktive Karte für DACH-Hersteller und Ofenbauer"></div>
           </div>
         </section>
       </section>
