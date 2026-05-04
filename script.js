@@ -20,7 +20,7 @@ const LAYERS = {
     key: "top",
     label: "Top Targets",
     tooltip:
-      "Finale A-Priorität: Hersteller plus wenige Ofenbauer mit hohem Business Impact und hohem Fit.",
+      "Finale A-Prioritaet: Hersteller plus wenige Ofenbauer mit hohem Business Impact und hohem Fit.",
     url: "data/dach_ofen_top_map_data_final.json",
     expectedCount: 65
   },
@@ -28,7 +28,7 @@ const LAYERS = {
     key: "filtered",
     label: "Relevante Betriebe",
     tooltip:
-      "Alle Firmen mit finaler Priorität A oder B für die laufende Vertriebsbearbeitung.",
+      "Alle Firmen mit finaler Prioritaet A oder B fuer die laufende Vertriebsbearbeitung.",
     url: "data/dach_ofen_filtered_map_data_final.json",
     expectedCount: 315
   },
@@ -36,7 +36,7 @@ const LAYERS = {
     key: "full",
     label: "Full Market",
     tooltip:
-      "Vollständige finale DACH-Marktabdeckung mit 857 Firmen für Markt- und Regionsanalysen.",
+      "Vollstaendige finale DACH-Marktabdeckung mit 857 Firmen fuer Markt- und Regionsanalysen.",
     url: "data/dach_ofen_full_map_data_final.json",
     expectedCount: 857
   }
@@ -256,7 +256,7 @@ async function loadLayer(layerKey, { fitToBounds = false } = {}) {
     elements.resultCount.textContent = "Datenfehler";
     elements.resultMeta.textContent = "Die Layer-Datei konnte nicht geladen werden.";
     elements.resultsList.innerHTML = renderEmptyState(
-      "Bitte prüfe, ob die JSON-Datei für den gewählten Layer im data-Ordner vorhanden ist."
+      "Bitte prÃ¼fe, ob die JSON-Datei fÃ¼r den gewÃ¤hlten Layer im data-Ordner vorhanden ist."
     );
   }
 }
@@ -320,7 +320,7 @@ function populateCountryFilter(companies) {
   const countries = [...new Set(companies.map((company) => company.country).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, "de"));
 
-  elements.countryFilter.innerHTML = '<option value="">Alle Länder</option>';
+  elements.countryFilter.innerHTML = '<option value="">Alle LÃ¤nder</option>';
   countries.forEach((country) => {
     const option = document.createElement("option");
     option.value = country;
@@ -474,11 +474,11 @@ function renderMarkers(companies) {
 
 function renderResults(companies) {
   elements.resultCount.textContent = `${state.filteredCompanies.length} Treffer`;
-  elements.resultMeta.textContent = `${companies.length} Firmen in der Kartenansicht. Klick auf eine Firma fokussiert direkt den Marker.`;
+  elements.resultMeta.textContent = `${companies.length} Firmen im aktuellen Kartenbild. Klick auf eine Firma fokussiert direkt den Marker.`;
 
   if (companies.length === 0) {
     elements.resultsList.innerHTML = renderEmptyState(
-      "Keine Karten-Treffer für die aktuelle Kombination aus Layer, Filtern und Suche."
+      "Keine Karten-Treffer fÃ¼r die aktuelle Kombination aus Layer, Filtern und Suche."
     );
     return;
   }
@@ -659,7 +659,7 @@ function focusCompany(companyId) {
 
 function createMarkerIcon(company) {
   const markerPresentation = resolveMarkerPresentation(company);
-  const sizeKey = normalizeText(markerPresentation.size).replace(/ß/g, "ss");
+  const sizeKey = normalizeText(markerPresentation.size).replace(/ÃŸ/g, "ss");
   const sizeMap = {
     gross: { css: "gross", pixels: 28 },
     mittel: { css: "mittel", pixels: 22 },
@@ -680,7 +680,7 @@ function createMarkerIcon(company) {
 
 function resolveMarkerPresentation(company) {
   const color = normalizeText(company.marker_color);
-  const size = normalizeText(company.marker_size).replace(/ß/g, "ss");
+  const size = normalizeText(company.marker_size).replace(/ÃŸ/g, "ss");
   const opacity = company.marker_opacity;
 
   const hasExplicitMarker =
@@ -731,7 +731,7 @@ function resolveMarkerPresentation(company) {
 
 function createPopupMarkup(company) {
   const websiteLink = company.website
-    ? `<a class="popup-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">Website öffnen</a>`
+    ? `<a class="popup-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">Website Ã¶ffnen</a>`
     : `<span class="popup-card__meta">Website nicht hinterlegt</span>`;
   const emailLink = company.email
     ? `<a class="popup-card__link" href="mailto:${escapeAttribute(company.email)}">${escapeHtml(company.email)}</a>`
@@ -760,6 +760,8 @@ function createPopupMarkup(company) {
         ${phoneLink}
         ${mapsAction}
       </div>
+
+      ${company.strategy ? `<p class="popup-card__strategy"><strong>Entry Strategy:</strong> ${escapeHtml(company.strategy)}</p>` : ""}
     </article>
   `;
 }
@@ -776,10 +778,10 @@ function renderPopupRow(label, value) {
 function buildCompanyDetailBlocks(company) {
   const rows = [];
 
-  rows.push(renderDetailIfValue("Typ", formatTypeLabel(company.company_type)));
+  rows.push(renderDetailIfValue("Unternehmenstyp", formatTypeLabel(company.company_type)));
   rows.push(renderDetailIfValue("Produktkategorien", company.product_categories));
-  rows.push(renderDetailIfValue("Prioritätsgrund", company.priority_reason));
-  rows.push(renderDetailIfValue("Vertriebsansatz", company.strategy));
+  rows.push(renderDetailIfValue("PrioritÃ¤tsgrund", company.priority_reason));
+  rows.push(renderDetailIfValue("Entry Strategy", company.strategy));
 
   return rows.filter(Boolean).join("");
 }
@@ -789,8 +791,8 @@ function buildPopupDetailBlocks(company) {
 
   rows.push(renderDetailIfValue("Adresse", getAddressLabel(company)));
   rows.push(renderDetailIfValue("Produktkategorien", company.product_categories));
-  rows.push(renderDetailIfValue("Prioritätsgrund", company.priority_reason));
-  rows.push(renderDetailIfValue("Vertriebsansatz", company.strategy));
+  rows.push(renderDetailIfValue("PrioritÃ¤tsgrund", company.priority_reason));
+  rows.push(renderDetailIfValue("Entry Strategy", company.strategy));
 
   return rows.filter(Boolean).join("");
 }
@@ -904,7 +906,6 @@ function normalizeText(value) {
     .toString()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ß/g, "ss")
     .replace(/ÃŸ/g, "ss")
     .toLowerCase()
     .trim();
