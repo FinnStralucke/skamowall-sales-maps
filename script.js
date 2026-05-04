@@ -15,6 +15,9 @@ const DACH_COORD_BOUNDS = {
   maxLng: 18.5
 };
 
+const RESULT_BATCH_SIZE = 36;
+const RESULT_SCROLL_THRESHOLD = 320;
+
 const LAYERS = {
   top: {
     key: "top",
@@ -51,8 +54,11 @@ const state = {
   filteredCompanies: [],
   markerIndex: new Map(),
   pendingFitFrame: null,
+  pendingResultBatch: null,
   activeTooltipLayer: null,
-  isLegendModalOpen: false
+  isLegendModalOpen: false,
+  resultCompanies: [],
+  renderedResultCount: 0
 };
 
 const elements = {
@@ -135,6 +141,8 @@ function bindEvents() {
 
   elements.resetFiltersButton.addEventListener("click", () => resetFilters({ keepLayer: true }));
   elements.fitBoundsButton.addEventListener("click", () => fitToCurrentMarkers());
+  elements.resultsList?.addEventListener("click", handleResultsListClick);
+  elements.resultsList?.addEventListener("scroll", handleResultsListScroll);
 
   elements.infoButton?.addEventListener("click", () => {
     if (state.isLegendModalOpen) {
@@ -476,49 +484,108 @@ function renderResults(companies) {
   elements.resultCount.textContent = `${state.filteredCompanies.length} Treffer`;
   elements.resultMeta.textContent = `${companies.length} Firmen in der Kartenansicht. Klick auf eine Firma fokussiert direkt den Marker.`;
 
+  if (state.pendingResultBatch !== null) {
+    cancelAnimationFrame(state.pendingResultBatch);
+    state.pendingResultBatch = null;
+  }
+
   if (companies.length === 0) {
+    state.resultCompanies = [];
+    state.renderedResultCount = 0;
     elements.resultsList.innerHTML = renderEmptyState(
       "Keine Karten-Treffer für die aktuelle Kombination aus Layer, Filtern und Suche."
     );
     return;
   }
 
-  elements.resultsList.innerHTML = companies.map((company) => {
+  state.resultCompanies = companies;
+  state.renderedResultCount = 0;
+  elements.resultsList.innerHTML = "";
+  elements.resultsList.scrollTop = 0;
+  appendNextResultBatch();
+}
+
+function renderResultCard(company) {
     const mapsLink = buildGoogleMapsLink(company);
     const websiteLabel = company.website ? "Website" : "Website fehlt";
     const websiteMarkup = company.website
       ? `<a class="company-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">${websiteLabel}</a>`
       : `<span class="company-card__link company-card__link--muted">${websiteLabel}</span>`;
 
-    return `
-      <article class="company-card ${getCompanyCardClass(company)}">
-        <button class="company-card__button" type="button" data-company-id="${company._id}">
-          <div class="company-card__header">
-            <div class="company-card__identity">
-              <p class="company-card__name">${escapeHtml(company.name)}</p>
-              <div class="company-card__meta">${escapeHtml(formatLocation(company))}</div>
-              ${getAddressLabel(company) ? `<div class="company-card__address">${escapeHtml(getAddressLabel(company))}</div>` : ""}
-            </div>
+  return `
+    <article class="company-card ${getCompanyCardClass(company)}">
+      <button class="company-card__button" type="button" data-company-id="${company._id}">
+        <div class="company-card__header">
+          <div class="company-card__identity">
+            <p class="company-card__name">${escapeHtml(company.name)}</p>
+            <div class="company-card__meta">${escapeHtml(formatLocation(company))}</div>
+            ${getAddressLabel(company) ? `<div class="company-card__address">${escapeHtml(getAddressLabel(company))}</div>` : ""}
           </div>
-          <div class="detail-list detail-list--card">
-            ${buildCompanyDetailBlocks(company)}
-          </div>
-        </button>
-        <div class="company-card__footer">
-          ${websiteMarkup}
-          ${company.email ? `<a class="company-card__link" href="mailto:${escapeAttribute(company.email)}">${escapeHtml(company.email)}</a>` : ""}
-          ${company.phone ? `<a class="company-card__link" href="tel:${escapeAttribute(company.phone)}">${escapeHtml(company.phone)}</a>` : ""}
-          ${mapsLink ? `<a class="company-card__link" href="${escapeAttribute(mapsLink)}" target="_blank" rel="noreferrer">Google Maps</a>` : ""}
         </div>
-      </article>
-    `;
-  }).join("");
+        <div class="detail-list detail-list--card">
+          ${buildCompanyDetailBlocks(company)}
+        </div>
+      </button>
+      <div class="company-card__footer">
+        ${websiteMarkup}
+        ${company.email ? `<a class="company-card__link" href="mailto:${escapeAttribute(company.email)}">${escapeHtml(company.email)}</a>` : ""}
+        ${company.phone ? `<a class="company-card__link" href="tel:${escapeAttribute(company.phone)}">${escapeHtml(company.phone)}</a>` : ""}
+        ${mapsLink ? `<a class="company-card__link" href="${escapeAttribute(mapsLink)}" target="_blank" rel="noreferrer">Google Maps</a>` : ""}
+      </div>
+    </article>
+  `;
+}
 
-  elements.resultsList.querySelectorAll("[data-company-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      focusCompany(button.dataset.companyId);
-    });
+function appendNextResultBatch() {
+  if (!elements.resultsList || state.renderedResultCount >= state.resultCompanies.length) {
+    return;
+  }
+
+  const start = state.renderedResultCount;
+  const end = Math.min(start + RESULT_BATCH_SIZE, state.resultCompanies.length);
+  const markup = state.resultCompanies.slice(start, end).map(renderResultCard).join("");
+  const template = document.createElement("template");
+  template.innerHTML = markup;
+  elements.resultsList.appendChild(template.content);
+  state.renderedResultCount = end;
+
+  if (
+    state.renderedResultCount < state.resultCompanies.length &&
+    elements.resultsList.scrollHeight <= elements.resultsList.clientHeight + 80
+  ) {
+    queueNextResultBatch();
+  }
+}
+
+function queueNextResultBatch() {
+  if (state.pendingResultBatch !== null || state.renderedResultCount >= state.resultCompanies.length) {
+    return;
+  }
+
+  state.pendingResultBatch = requestAnimationFrame(() => {
+    state.pendingResultBatch = null;
+    appendNextResultBatch();
   });
+}
+
+function handleResultsListScroll(event) {
+  const list = event.currentTarget;
+  if (!(list instanceof HTMLElement)) {
+    return;
+  }
+
+  if (list.scrollTop + list.clientHeight >= list.scrollHeight - RESULT_SCROLL_THRESHOLD) {
+    queueNextResultBatch();
+  }
+}
+
+function handleResultsListClick(event) {
+  const trigger = event.target?.closest?.("[data-company-id]");
+  if (!trigger) {
+    return;
+  }
+
+  focusCompany(trigger.dataset.companyId);
 }
 
 function renderStats(companiesOnMap) {
