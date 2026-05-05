@@ -15,9 +15,6 @@ const DACH_COORD_BOUNDS = {
   maxLng: 18.5
 };
 
-const RESULT_BATCH_SIZE = 36;
-const RESULT_SCROLL_THRESHOLD = 320;
-
 const LAYERS = {
   top: {
     key: "top",
@@ -54,11 +51,8 @@ const state = {
   filteredCompanies: [],
   markerIndex: new Map(),
   pendingFitFrame: null,
-  pendingResultBatch: null,
   activeTooltipLayer: null,
-  isLegendModalOpen: false,
-  resultCompanies: [],
-  renderedResultCount: 0
+  isLegendModalOpen: false
 };
 
 const elements = {
@@ -142,7 +136,7 @@ function bindEvents() {
   elements.resetFiltersButton.addEventListener("click", () => resetFilters({ keepLayer: true }));
   elements.fitBoundsButton.addEventListener("click", () => fitToCurrentMarkers());
   elements.resultsList?.addEventListener("click", handleResultsListClick);
-  elements.resultsList?.addEventListener("scroll", handleResultsListScroll);
+  elements.resultsList?.addEventListener("keydown", handleResultsListKeydown);
 
   elements.infoButton?.addEventListener("click", () => {
     if (state.isLegendModalOpen) {
@@ -452,7 +446,7 @@ function applyFilters({ fitToBounds = false } = {}) {
     (company) => hasValidMapCoordinates(company.lat, company.lng)
   );
   renderMarkers(companiesOnMap);
-  renderResults(companiesOnMap);
+  renderResults(state.filteredCompanies, companiesOnMap.length);
   renderStats(companiesOnMap);
 
   if (fitToBounds) {
@@ -480,44 +474,39 @@ function renderMarkers(companies) {
   });
 }
 
-function renderResults(companies) {
+function renderResults(companies, mapCompanyCount = companies.length) {
   elements.resultCount.textContent = `${state.filteredCompanies.length} Treffer`;
-  elements.resultMeta.textContent = `${companies.length} Firmen in der Kartenansicht. Klick auf eine Firma fokussiert direkt den Marker.`;
-
-  if (state.pendingResultBatch !== null) {
-    cancelAnimationFrame(state.pendingResultBatch);
-    state.pendingResultBatch = null;
-  }
+  elements.resultMeta.textContent = buildResultMetaText(companies.length, mapCompanyCount);
 
   if (companies.length === 0) {
-    state.resultCompanies = [];
-    state.renderedResultCount = 0;
     elements.resultsList.innerHTML = renderEmptyState(
       "Keine Karten-Treffer für die aktuelle Kombination aus Layer, Filtern und Suche."
     );
     return;
   }
 
-  state.resultCompanies = companies;
-  state.renderedResultCount = 0;
-  elements.resultsList.innerHTML = "";
   elements.resultsList.scrollTop = 0;
-  appendNextResultBatch();
+  elements.resultsList.innerHTML = companies.map(renderResultCard).join("");
 }
 
 function renderResultCard(company) {
-    const mapsLink = buildGoogleMapsLink(company);
-    const websiteLabel = company.website ? "Website" : "Website fehlt";
-    const websiteMarkup = company.website
-      ? `<a class="company-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">${websiteLabel}</a>`
-      : `<span class="company-card__link company-card__link--muted">${websiteLabel}</span>`;
+  const mapsLink = buildGoogleMapsLink(company);
+  const websiteLabel = company.website ? "Website" : "Website fehlt";
+  const websiteMarkup = company.website
+    ? `<a class="company-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">Website</a>`
+    : `<span class="company-card__link company-card__link--muted">${websiteLabel}</span>`;
+  const companyName = company.name || company.company_name || "Unbekannte Firma";
+  const canFocusMarker = hasValidMapCoordinates(company.lat, company.lng);
+  const interactiveAttributes = canFocusMarker
+    ? `data-company-id="${company._id}" tabindex="0" role="button" aria-label="${escapeAttribute(`${companyName} auf der Karte fokussieren`)}"`
+    : `tabindex="-1" aria-disabled="true"`;
 
   return `
-    <article class="company-card ${getCompanyCardClass(company)}">
-      <button class="company-card__button" type="button" data-company-id="${company._id}">
+    <article class="company-card ${getCompanyCardClass(company)} ${canFocusMarker ? "" : "company-card--no-marker"}" ${interactiveAttributes}>
+      <div class="company-card__surface">
         <div class="company-card__header">
           <div class="company-card__identity">
-            <p class="company-card__name">${escapeHtml(company.name)}</p>
+            <p class="company-card__name">${escapeHtml(companyName)}</p>
             <div class="company-card__meta">${escapeHtml(formatLocation(company))}</div>
             ${getAddressLabel(company) ? `<div class="company-card__address">${escapeHtml(getAddressLabel(company))}</div>` : ""}
           </div>
@@ -525,7 +514,7 @@ function renderResultCard(company) {
         <div class="detail-list detail-list--card">
           ${buildCompanyDetailBlocks(company)}
         </div>
-      </button>
+      </div>
       <div class="company-card__footer">
         ${websiteMarkup}
         ${company.email ? `<a class="company-card__link" href="mailto:${escapeAttribute(company.email)}">${escapeHtml(company.email)}</a>` : ""}
@@ -536,55 +525,30 @@ function renderResultCard(company) {
   `;
 }
 
-function appendNextResultBatch() {
-  if (!elements.resultsList || state.renderedResultCount >= state.resultCompanies.length) {
-    return;
-  }
-
-  const start = state.renderedResultCount;
-  const end = Math.min(start + RESULT_BATCH_SIZE, state.resultCompanies.length);
-  const markup = state.resultCompanies.slice(start, end).map(renderResultCard).join("");
-  const template = document.createElement("template");
-  template.innerHTML = markup;
-  elements.resultsList.appendChild(template.content);
-  state.renderedResultCount = end;
-
-  if (
-    state.renderedResultCount < state.resultCompanies.length &&
-    elements.resultsList.scrollHeight <= elements.resultsList.clientHeight + 80
-  ) {
-    queueNextResultBatch();
-  }
-}
-
-function queueNextResultBatch() {
-  if (state.pendingResultBatch !== null || state.renderedResultCount >= state.resultCompanies.length) {
-    return;
-  }
-
-  state.pendingResultBatch = requestAnimationFrame(() => {
-    state.pendingResultBatch = null;
-    appendNextResultBatch();
-  });
-}
-
-function handleResultsListScroll(event) {
-  const list = event.currentTarget;
-  if (!(list instanceof HTMLElement)) {
-    return;
-  }
-
-  if (list.scrollTop + list.clientHeight >= list.scrollHeight - RESULT_SCROLL_THRESHOLD) {
-    queueNextResultBatch();
-  }
-}
-
 function handleResultsListClick(event) {
+  if (event.target?.closest?.("a")) {
+    return;
+  }
+
   const trigger = event.target?.closest?.("[data-company-id]");
   if (!trigger) {
     return;
   }
 
+  focusCompany(trigger.dataset.companyId);
+}
+
+function handleResultsListKeydown(event) {
+  const trigger = event.target?.closest?.("[data-company-id]");
+  if (!trigger) {
+    return;
+  }
+
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  event.preventDefault();
   focusCompany(trigger.dataset.companyId);
 }
 
@@ -886,6 +850,18 @@ function getCompanyCardClass(company) {
   }
 
   return classes.join(" ");
+}
+
+function buildResultMetaText(listCount, mapCount) {
+  if (listCount === 0) {
+    return "Keine Firmen in der Trefferliste.";
+  }
+
+  if (listCount === mapCount) {
+    return `${listCount} Firmen in der Trefferliste. Klick auf eine Firma fokussiert direkt den Marker.`;
+  }
+
+  return `${listCount} Firmen in der Trefferliste, ${mapCount} davon in der Kartenansicht. Klick auf eine Firma mit Marker fokussiert direkt den Karteneintrag.`;
 }
 
 function formatTypeLabel(type) {

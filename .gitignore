@@ -1,0 +1,15 @@
+# Temp browser profiles from Codex testing
+.tmp-edge-headless-profile*/
+
+# Debug/test artifacts
+tmp-*.html
+tmp-*.png
+http_server_*.log
+server-*.log
+server-*.err.log
+server-*.out.log
+__smoke_test__.html
+
+# OS
+.DS_Store
+Thumbs.db
