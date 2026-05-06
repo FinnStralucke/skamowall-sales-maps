@@ -149,6 +149,13 @@ button {
   min-width: 0;
 }
 
+.topbar__map-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .topbar__summary {
   display: flex;
   align-items: center;

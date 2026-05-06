@@ -1,5 +1,16 @@
 # DACH Ofen Sales Map
 
+## Weitere Seite
+- `north/`
+  Eigene GitHub-Pages-Unterseite fuer `SkamoWall DACH Nord` mit reviewed Leads
+  fuer Norddeutschland.
+- `data/skamowall_de_north_reviewed.json`
+  Datenbasis fuer die Nord-Seite.
+- `Skamowall_DACH_nord_reviewed.xlsx`
+  Download-Datei der reviewed Nord-Excel.
+- `build_north_map_assets.mjs`
+  Synchronisiert JSON und Excel aus dem lokalen `de north`-Arbeitsstand in dieses Repo.
+
 ## Projektzweck
 Diese GitHub-Pages-Anwendung visualisiert den finalen DACH-Ofenmarkt für Skamol.
 Sie kombiniert Hersteller und Ofenbauer für Gebietsplanung, Markttransparenz und
@@ -17,6 +28,7 @@ vertriebliche Priorisierung.
 - `data/dach_ofen_top_map_data_final.json`
 - `data/dach_ofen_filtered_map_data_final.json`
 - `data/dach_ofen_full_map_data_final.json`
+- `data/skamowall_de_north_reviewed.json`
 
 Die Layer werden aus dem finalen Datenstand abgeleitet:
 - `output/dach_ofen_combined_master_final.csv`
@@ -25,10 +37,16 @@ Die Layer werden aus dem finalen Datenstand abgeleitet:
 ## Wichtige Dateien
 - `index.html`
   Einstiegspunkt der GitHub-Pages-Seite
+- `north/index.html`
+  Einstiegspunkt der Norddeutschland-Wall-Map
 - `style.css`
   Layout, Responsive-Design und UI-Styling
 - `script.js`
   Layer-Laden, Filterlogik, Suche, Karte, Cluster, Popups und Firmenliste
+- `north/style.css`
+  Eigenes Layout und UI-Styling fuer die Nord-Unterseite
+- `north/script.js`
+  Filter, Map-Logik und Trefferliste fuer die Nord-Unterseite
 - `data/*.json`
   Die veröffentlichten finalen Karten-Layer
 
