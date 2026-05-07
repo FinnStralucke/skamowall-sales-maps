@@ -156,7 +156,7 @@ function t(key) {
   return (TRANSLATIONS[_lang] || TRANSLATIONS.de)[key] || key;
 }
 
-let _lang = "de";
+let _lang = "en";
 
 function applyLanguage(lang) {
   _lang = lang;
@@ -228,7 +228,7 @@ const LAYERS = {
     label: "Top Targets",
     tooltip:
       "Finale A-Priorität: Hersteller plus wenige Ofenbauer mit hohem Business Impact und hohem Fit.",
-    url: "../data/dach_ofen_top_map_data_final.json",
+    url: "data/dach_ofen_top_map_data_final.json",
     expectedCount: 65
   },
   filtered: {
@@ -236,7 +236,7 @@ const LAYERS = {
     label: "Relevante Betriebe",
     tooltip:
       "Alle Firmen mit finaler Priorität A oder B für die laufende Vertriebsbearbeitung.",
-    url: "../data/dach_ofen_filtered_map_data_final.json",
+    url: "data/dach_ofen_filtered_map_data_final.json",
     expectedCount: 315
   },
   full: {
@@ -244,7 +244,7 @@ const LAYERS = {
     label: "Full Market",
     tooltip:
       "Vollständige finale DACH-Marktabdeckung mit 857 Firmen für Markt- und Regionsanalysen.",
-    url: "../data/dach_ofen_full_map_data_final.json",
+    url: "data/dach_ofen_full_map_data_final.json",
     expectedCount: 857
   }
 };
@@ -292,6 +292,7 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   initMap();
   bindEvents();
+  applyLanguage(_lang); // translate the static HTML before any data loads
   await loadLayer("top", { fitToBounds: true });
 }
 
@@ -1098,15 +1099,13 @@ function buildGoogleMapsLink(company) {
 
 function formatCountryShort(country) {
   const normalized = normalizeText(country);
-  if (normalized === "deutschland") {
-    return "DE";
-  }
-  if (normalized === "osterreich") {
-    return "AT";
-  }
-  if (normalized === "schweiz") {
-    return "CH";
-  }
+  if (normalized === "deutschland" || normalized === "germany") return "DE";
+  if (normalized === "osterreich" || normalized === "austria") return "AT";
+  if (normalized === "schweiz" || normalized === "switzerland") return "CH";
+  if (normalized === "belgien" || normalized === "belgium") return "BE";
+  if (normalized === "frankreich" || normalized === "france") return "FR";
+  if (normalized === "luxemburg" || normalized === "luxembourg") return "LU";
+  if (normalized === "niederlande" || normalized === "netherlands") return "NL";
   return country || "";
 }
 
