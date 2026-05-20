@@ -51,6 +51,7 @@ const TRANSLATIONS = {
     "popup.no_email":          "Keine E-Mail hinterlegt",
     "popup.no_phone":          "Keine Telefonnummer hinterlegt",
     "popup.maps":              "Adresse in Google Maps",
+    "popup.linkedin_contacts": "LinkedIn-Kontakte",
     "location.unknown":        "Ort offen",
     "legend.title":            "Legende & Prioritäten",
     "legend.close":            "Legende schließen",
@@ -126,6 +127,7 @@ const TRANSLATIONS = {
     "popup.no_email":          "No email available",
     "popup.no_phone":          "No phone number available",
     "popup.maps":              "Address in Google Maps",
+    "popup.linkedin_contacts": "LinkedIn Contacts",
     "location.unknown":        "Location unknown",
     "legend.title":            "Legend & Priorities",
     "legend.close":            "Close legend",
@@ -155,6 +157,118 @@ const TRANSLATIONS = {
 function t(key) {
   return (TRANSLATIONS[_lang] || TRANSLATIONS.de)[key] || key;
 }
+
+// -- LinkedIn Contacts -------------------------------------------------------
+const LINKEDIN_CONTACTS = [
+  { company: "AUSTROFLAMM GmbH", contacts: [
+    { name: "Alexander Niedersuess",   role: "Purchasing",                               url: "https://www.linkedin.com/in/alexander-nieders%C3%BC%C3%9F-61b519205/" },
+    { name: "Ezequiel Pruegger",       role: "Purchasing",                               url: "https://www.linkedin.com/in/ezequiel-pr%C3%BCgger-5b33a32a9/" },
+    { name: "Matej Bucinel",           role: "Product Manager",                          url: "https://www.linkedin.com/in/matej-bu%C4%8Dinel-7514559a/" }
+  ]},
+  { company: "HARK GmbH & Co. KG", contacts: [
+    { name: "Waldemar Leib",           role: "Head of Purchasing",                       url: "https://www.linkedin.com/in/waldemar-leib-a4922b9a/" }
+  ]},
+  { company: "LEDA Werk GmbH & Co. KG", contacts: [
+    { name: "Onno Cramer",             role: "Head of Product Development",              url: "https://www.linkedin.com/in/onno-cramer-8bba1410a/" },
+    { name: "Hans-Joachim Bluethmann", role: "Technical Director",                       url: "https://www.linkedin.com/in/hans-joachim-bl%C3%BCthmann-684390348/" },
+    { name: "Marcel Wolter",           role: "R&D",                                      url: "https://www.linkedin.com/in/marcel-wolter-269105186/" }
+  ]},
+  { company: "Lohberger GmbH", contacts: [
+    { name: "Peter Schaller",          role: "Manager Purchasing",                       url: "https://www.linkedin.com/in/peter-schaller-048984142/" },
+    { name: "Nadine Rieger",           role: "Purchasing",                               url: "https://www.linkedin.com/in/nadine-rieger-403851221/" }
+  ]},
+  { company: "Ulrich Brunner GmbH", contacts: [
+    { name: "Renate Stirner",          role: "Technical Purchasing / Asst. Management",  url: "https://www.linkedin.com/in/renate-stirner-b666b118/" },
+    { name: "Richard Pointner",        role: "Development Engineer",                     url: "https://www.linkedin.com/in/richard-pointner-a7517a285/" }
+  ]},
+  { company: "Camina & Schmid", contacts: [
+    { name: "Sven Borgstedt",          role: "Operations (Logistics / Purchase / Prod.)", url: "https://www.linkedin.com/in/sven-borgstedt-7998021a2/" },
+    { name: "Julian Strakerjahn",      role: "Purchasing",                               url: "https://www.linkedin.com/in/julian-strakerjahn-a617373b3/" }
+  ]},
+  { company: "HASE Kaminofenbau GmbH", contacts: [
+    { name: "Florian Fischer",         role: "Head of Production Development",           url: "https://www.linkedin.com/in/florian-fischer-7a7541285/" }
+  ]},
+  { company: "Ortner GmbH", contacts: [
+    { name: "Christian Walter",        role: "Product Manager",                          url: "https://www.linkedin.com/in/christian-walter-37b8a995/" }
+  ]},
+  { company: "Rika Innovative Ofentechnik GmbH", contacts: [
+    { name: "Tomislav Dramac",         role: "Head of Production",                       url: "https://www.linkedin.com/in/tomislav-dramac-594b2929b/" }
+  ]},
+  { company: "Spartherm Feuerungstechnik GmbH", contacts: [
+    { name: "Marc Diekmann",           role: "Contact (existing customer)",              url: "https://www.linkedin.com/in/marc-diekmann-185603395/" }
+  ]},
+  { company: "Tiba AG", contacts: [
+    { name: "Cedric Waldmeier",        role: "Project Manager Heat Systems",             url: "https://www.linkedin.com/in/cedric-waldmeier-046301167/" }
+  ]},
+  { company: "WAMSLER", contacts: [
+    { name: "Zoltan Peter Nemeth",     role: "CEO",                                      url: "https://www.linkedin.com/in/zolt%C3%A1n-p%C3%A9ter-n%C3%A9meth-40959b84/" }
+  ]},
+  { company: "rondo Ringkachelofen GmbH", contacts: [
+    { name: "Hanspeter Luedin",        role: "Former Head of Design & Development",      url: "https://www.linkedin.com/in/hanspeter-l%C3%BCdin-4b0a96130/" }
+  ]},
+  { company: "Drooff Kaminoefen GmbH & Co. KG", contacts: [
+    { name: "Till Klask",              role: "Managing Director",                        url: "https://www.linkedin.com/in/till-klask-043b8915b/" }
+  ]},
+  { company: "Wotan Heizeinsaetze GmbH", contacts: [
+    { name: "Regina Puetz",            role: "Managing Director",                        url: "https://www.linkedin.com/in/regina-gina-p%C3%BCtz-81882a79/" }
+  ]},
+  { company: "AMBIO Speicherofen & Kamin GmbH", contacts: [
+    { name: "Armin Zipka",             role: "CEO",                                      url: "https://www.linkedin.com/in/armin-zipka-47749b33a/" }
+  ]},
+  { company: "Bernhard Kaschuetz GmbH", contacts: [
+    { name: "Harald Laber",            role: "Operations Manager",                       url: "https://www.linkedin.com/in/harald-laber-68a97aba/" }
+  ]},
+  { company: "Bullerjan GmbH", contacts: [
+    { name: "Julius Ratjen",           role: "Managing Director",                        url: "https://www.linkedin.com/in/julius-ratjen-82a204/" }
+  ]},
+  { company: "CERA DESIGN by Britta von Tasch GmbH", contacts: [
+    { name: "Britta von Tasch",        role: "CEO",                                      url: "https://www.linkedin.com/in/britta-von-tasch-84187b158/" }
+  ]},
+  { company: "Erwin KOPPE", contacts: [
+    { name: "Veronika Proesl",         role: "Purchasing",                               url: "https://www.linkedin.com/in/veronika-pr%C3%B6sl-4632b4286/" }
+  ]},
+  { company: "HAFNERTEC", contacts: [
+    { name: "Leopold Bicker",          role: "CEO",                                      url: "https://www.linkedin.com/in/leopold-bicker-17a4b7bb/" }
+  ]},
+  { company: "Max Blank GmbH", contacts: [
+    { name: "Thomas Blank",            role: "CEO",                                      url: "https://www.linkedin.com/in/thomas-blank-03784b150/" }
+  ]},
+  { company: "Ofenfabrik Schenk AG", contacts: [
+    { name: "David Broger",            role: "Head of Production & Technics",            url: "https://www.linkedin.com/in/david-broger-23b0ba2/" }
+  ]},
+  { company: "PROMETHEUS Oefen GmbH", contacts: [
+    { name: "Anton Brandauer",         role: "CEO",                                      url: "https://www.linkedin.com/in/anton-brandauer-600a61113/" }
+  ]},
+  { company: "wodtke GmbH", contacts: [
+    { name: "Kristijan Dolibasic",     role: "Purchasing",                               url: "https://www.linkedin.com/in/kristijan-dolibasic-0180b7207/" }
+  ]},
+  { company: "Kloss Wohnherde GmbH", contacts: [
+    { name: "Hans-Peter Hubmann",      role: "Production Manager",                       url: "https://ch.linkedin.com/in/hans-peter-hubmann-a615ba51" }
+  ]},
+  { company: "Hans Greub AG", contacts: [
+    { name: "Oliver Rosin",            role: "Design & Engineering",                     url: "https://ch.linkedin.com/in/oliver-rosin-8202a12a2" }
+  ]}
+];
+
+function normalizeName(s) {
+  return s.toLowerCase()
+    .replace(/\b(gmbh|co\.|co|kg|kgaa|ag|se|und|haus-|haus)\b/g, "")
+    .replace(/[^a-z0-9]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getLinkedInContacts(companyName) {
+  const norm = normalizeName(companyName);
+  for (const entry of LINKEDIN_CONTACTS) {
+    const entryNorm = normalizeName(entry.company);
+    if (norm === entryNorm || norm.includes(entryNorm) || entryNorm.includes(norm)) {
+      return entry.contacts;
+    }
+  }
+  return [];
+}
+
 
 let _lang = "en";
 
@@ -677,6 +791,12 @@ function renderMarkers(companies) {
       maxWidth: 360
     });
 
+    const mLiContacts = getLinkedInContacts(company.name);
+    if (mLiContacts.length > 0 && !usesTapTooltipMode()) {
+      const names = mLiContacts.map(c => `<span class="mtt-name">${escapeHtml(c.name)}</span>`).join("");
+      marker.bindTooltip(`<div class="mtt"><strong>${escapeHtml(company.name)}</strong><div class="mtt__contacts"><svg viewBox="0 0 16 16" fill="#0a66c2" width="11" height="11"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg> ${names}</div></div>`, { direction: "top", className: "li-map-tooltip", sticky: false });
+    }
+
     state.markerIndex.set(company._id, marker);
     state.clusterGroup.addLayer(marker);
   });
@@ -706,6 +826,14 @@ function renderResultCard(company) {
     ? `data-company-id="${company._id}" tabindex="0" role="button" aria-label="${escapeAttribute(`${companyName} ${t("card.focus.aria")}`)}"`
     : `tabindex="-1" aria-disabled="true"`;
 
+  const cardLiContacts = getLinkedInContacts(company.name);
+  const liBadge = cardLiContacts.length > 0
+    ? `<button class="company-card__li-btn" title="${cardLiContacts.length} LinkedIn contact${cardLiContacts.length > 1 ? "s" : ""}: ${escapeAttribute(cardLiContacts.map(c => c.name).join(", "))}" aria-label="LinkedIn contacts">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>
+        <span>${cardLiContacts.length}</span>
+      </button>`
+    : "";
+
   return `
     <article class="company-card ${getCompanyCardClass(company)} ${canFocusMarker ? "" : "company-card--no-marker"}" ${interactiveAttributes}>
       <div class="company-card__surface">
@@ -715,6 +843,7 @@ function renderResultCard(company) {
             <div class="company-card__meta">${escapeHtml(formatLocation(company))}</div>
             ${getAddressLabel(company) ? `<div class="company-card__address">${escapeHtml(getAddressLabel(company))}</div>` : ""}
           </div>
+          ${liBadge}
         </div>
         <div class="detail-list detail-list--card">
           ${buildCompanyDetailBlocks(company)}
@@ -904,10 +1033,11 @@ function createMarkerIcon(company) {
 
   const markerSize = sizeMap[sizeKey] ?? sizeMap.mittel;
   const opacity = Number(markerPresentation.opacity) || 1;
+  const hasDot = getLinkedInContacts(company.name).length > 0;
 
   return L.divIcon({
     className: "sales-marker-wrapper",
-    html: `<span class="sales-marker sales-marker--${escapeAttribute(markerPresentation.color)} sales-marker--${markerSize.css}" style="opacity:${opacity}"></span>`,
+    html: `<span class="sales-marker sales-marker--${escapeAttribute(markerPresentation.color)} sales-marker--${markerSize.css}" style="opacity:${opacity}"></span>${hasDot ? '<span class="li-dot"></span>' : ""}` ,
     iconSize: [markerSize.pixels, markerSize.pixels],
     iconAnchor: [markerSize.pixels / 2, markerSize.pixels / 2],
     popupAnchor: [0, -markerSize.pixels / 2]
@@ -980,6 +1110,18 @@ function createPopupMarkup(company) {
     ? `<a class="popup-card__link" href="${escapeAttribute(mapsLink)}" target="_blank" rel="noreferrer">${t("popup.maps")}</a>`
     : "";
 
+  const liContacts = getLinkedInContacts(company.name);
+  const linkedInBlock = liContacts.length > 0
+    ? `<div class="popup-card__linkedin">
+        <span class="popup-card__linkedin-label">${t("popup.linkedin_contacts")}</span>
+        ${liContacts.map(c => `
+          <a class="popup-card__link popup-card__link--li" href="${escapeAttribute(c.url.trim())}" target="_blank" rel="noreferrer">
+            <svg class="li-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>
+            <span class="li-name">${escapeHtml(c.name)}</span><span class="li-role"> · ${escapeHtml(c.role)}</span>
+          </a>`).join("")}
+      </div>`
+    : "";
+
   return `
     <article class="popup-card">
       <p class="popup-card__eyebrow">${escapeHtml(formatTypeLabel(company.company_type))}</p>
@@ -996,6 +1138,7 @@ function createPopupMarkup(company) {
         ${phoneLink}
         ${mapsAction}
       </div>
+      ${linkedInBlock}
     </article>
   `;
 }
