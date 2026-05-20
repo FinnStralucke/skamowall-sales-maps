@@ -186,6 +186,36 @@ button {
   font-weight: 700;
 }
 
+.lang-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.lang-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.46);
+  transform: translateY(-1px);
+}
+
+.lang-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.22);
+}
+
 .info-button {
   display: inline-flex;
   align-items: center;
@@ -1226,6 +1256,171 @@ button {
     right: 10px;
     max-width: 200px;
   }
+}
+
+/* ── LinkedIn badge on company cards (sidebar) ──────────────────────────────── */
+.company-card {
+  position: relative;
+}
+
+.company-card__li-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  background: #e8f1fb;
+  border: 1px solid #bbd6f0;
+  border-radius: 20px;
+  padding: 4px 9px 4px 7px;
+  cursor: pointer;
+  color: #0a66c2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.company-card__li-btn svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.company-card:hover .company-card__li-btn,
+.company-card:focus-within .company-card__li-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.company-card__li-btn:hover {
+  background: #cfe2f3;
+  border-color: #0a66c2;
+}
+
+/* ── LinkedIn dot badge on map markers ──────────────────────────────────────── */
+.li-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a66c2;
+  border: 2px solid #fff;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* ── LinkedIn hover tooltip on map markers ──────────────────────────────────── */
+.li-map-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.li-map-tooltip::before {
+  display: none !important;
+}
+
+.mtt {
+  background: #fff;
+  border: 1px solid #bbd6f0;
+  border-radius: 8px;
+  padding: 8px 11px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+  min-width: 160px;
+  max-width: 240px;
+  pointer-events: none;
+}
+
+.mtt strong {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mtt__contacts {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.mtt__contacts svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mtt-name {
+  display: block;
+  font-size: 0.72rem;
+  color: #0a66c2;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ── LinkedIn Contacts block inside popup ───────────────────────────────────── */
+.popup-card__linkedin {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink-200, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.popup-card__linkedin-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-500, #64748b);
+  margin-bottom: 2px;
+}
+
+.popup-card__link--li {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #0a66c2;
+  text-decoration: none;
+}
+
+.popup-card__link--li:hover {
+  color: #004182;
+  text-decoration: underline;
+}
+
+.li-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  position: relative;
+  top: 1px;
+}
+
+.li-name {
+  font-weight: 700;
+}
+
+.li-role {
+  color: var(--ink-600, #475569);
+  font-weight: 400;
+  font-size: 0.78rem;
 }
 
 @media (max-width: 560px) {

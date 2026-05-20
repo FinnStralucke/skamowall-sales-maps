@@ -1,4 +1,324 @@
-﻿const DEFAULT_VIEW = {
+﻿// ── Translations ─────────────────────────────────────────────────────────────
+const TRANSLATIONS = {
+  de: {
+    "page.title":              "DACH Ofenmarkt Sales Map",
+    "topbar.layer":            "Layer:",
+    "topbar.companies":        "Firmen",
+    "topbar.manufacturers":    "Hersteller",
+    "topbar.ofenbauer":        "Ofenbauer",
+    "topbar.info.aria":        "Info öffnen",
+    "filter.title":            "Filter",
+    "filter.layer":            "Layer",
+    "filter.type":             "Typ",
+    "filter.country":          "Land",
+    "filter.priority":         "Priorität",
+    "filter.toptarget":        "Top Target",
+    "filter.search":           "Suche",
+    "filter.search.placeholder":"z. B. Spartherm, Hamburg, Kamineinsätze",
+    "filter.all":              "Alle",
+    "filter.allcountries":     "Alle Länder",
+    "filter.yes":              "Ja",
+    "filter.no":               "Nein",
+    "btn.fitbounds":           "Treffer auf Karte",
+    "btn.reset":               "Filter zurücksetzen",
+    "results.kicker":          "Treffer",
+    "results.title":           "Trefferliste",
+    "results.loading":         "Lade Daten …",
+    "results.layerloading":    "Layer wird geladen ...",
+    "results.error.count":     "Datenfehler",
+    "results.error.msg":       "Die Layer-Datei konnte nicht geladen werden.",
+    "results.error.hint":      "Bitte prüfe, ob die JSON-Datei für den gewählten Layer im data-Ordner vorhanden ist.",
+    "results.empty":           "Keine Karten-Treffer für die aktuelle Kombination aus Layer, Filtern und Suche.",
+    "results.none":            "Keine Firmen in der Trefferliste.",
+    "layer.top":               "Top Targets",
+    "layer.top.tooltip":       "Finale A-Priorität: Hersteller plus wenige Ofenbauer mit hohem Business Impact und hohem Fit.",
+    "layer.filtered":          "Relevante Betriebe",
+    "layer.filtered.tooltip":  "Alle Firmen mit finaler Priorität A oder B für die laufende Vertriebsbearbeitung.",
+    "layer.full":              "Full Market",
+    "layer.full.tooltip":      "Vollständige finale DACH-Marktabdeckung mit 857 Firmen für Markt- und Regionsanalysen.",
+    "type.manufacturer":       "Hersteller",
+    "type.ofenbauer":          "Ofenbauer",
+    "type.unknown":            "Unklar",
+    "card.website":            "Website",
+    "card.website.missing":    "Website fehlt",
+    "detail.type":             "Typ",
+    "detail.products":         "Produktkategorien",
+    "detail.priority_reason":  "Prioritätsgrund",
+    "detail.strategy":         "Vertriebsansatz",
+    "detail.address":          "Adresse",
+    "popup.website":           "Website öffnen",
+    "popup.no_website":        "Website nicht hinterlegt",
+    "popup.no_email":          "Keine E-Mail hinterlegt",
+    "popup.no_phone":          "Keine Telefonnummer hinterlegt",
+    "popup.maps":              "Adresse in Google Maps",
+    "popup.linkedin_contacts": "LinkedIn-Kontakte",
+    "location.unknown":        "Ort offen",
+    "legend.title":            "Legende & Prioritäten",
+    "legend.close":            "Legende schließen",
+    "legend.rot":              " Rot: Hersteller A / High Fit",
+    "legend.gelb":             " Gelb: Hersteller B",
+    "legend.grau":             " Grau: Hersteller C",
+    "legend.blau":             " Blau: Ofenbauer high",
+    "legend.hellblau":         " Hellblau: Ofenbauer medium",
+    "legend.hellgrau":         " Hellgrau: Ofenbauer low",
+    "legend.size":             " Markergröße: Priorität / Relevanz",
+    "legend.priority":         " A = strategisch, B = relevant, C = Beobachtung",
+    "legend.compact.rot":      " Hersteller A / High Fit",
+    "legend.compact.gelb":     " Hersteller B",
+    "legend.compact.grau":     " Hersteller C",
+    "legend.compact.blau":     " Ofenbauer high",
+    "legend.compact.hellblau": " Ofenbauer medium",
+    "legend.compact.hellgrau": " Ofenbauer low",
+    "map.kicker":              "Karte",
+    "map.title":               "DACH Sales Map",
+    "map.aria":                "Interaktive Karte für DACH-Hersteller und Ofenbauer",
+    "card.focus.aria":         "auf der Karte fokussieren",
+    "results.meta.all":        "{count} Firmen in der Trefferliste. Klick auf eine Firma fokussiert direkt den Marker.",
+    "results.meta.partial":    "{count} Firmen in der Trefferliste, {mapCount} davon in der Kartenansicht. Klick auf eine Firma mit Marker fokussiert direkt den Karteneintrag."
+  },
+  en: {
+    "page.title":              "DACH Oven Market Sales Map",
+    "topbar.layer":            "Layer:",
+    "topbar.companies":        "Companies",
+    "topbar.manufacturers":    "Manufacturers",
+    "topbar.ofenbauer":        "Stove Builders",
+    "topbar.info.aria":        "Open info",
+    "filter.title":            "Filters",
+    "filter.layer":            "Layer",
+    "filter.type":             "Type",
+    "filter.country":          "Country",
+    "filter.priority":         "Priority",
+    "filter.toptarget":        "Top Target",
+    "filter.search":           "Search",
+    "filter.search.placeholder":"e.g. Spartherm, Hamburg, fireplace inserts",
+    "filter.all":              "All",
+    "filter.allcountries":     "All Countries",
+    "filter.yes":              "Yes",
+    "filter.no":               "No",
+    "btn.fitbounds":           "Show on Map",
+    "btn.reset":               "Reset Filters",
+    "results.kicker":          "Results",
+    "results.title":           "Results List",
+    "results.loading":         "Loading data…",
+    "results.layerloading":    "Loading layer...",
+    "results.error.count":     "Data error",
+    "results.error.msg":       "The layer file could not be loaded.",
+    "results.error.hint":      "Please check that the JSON file for the selected layer exists in the data folder.",
+    "results.empty":           "No results for the current combination of layer, filters and search.",
+    "results.none":            "No companies in the results list.",
+    "layer.top":               "Top Targets",
+    "layer.top.tooltip":       "Final A-Priority: Manufacturers and select stove builders with high business impact and fit.",
+    "layer.filtered":          "Relevant Companies",
+    "layer.filtered.tooltip":  "All companies with final priority A or B for ongoing sales engagement.",
+    "layer.full":              "Full Market",
+    "layer.full.tooltip":      "Complete DACH market coverage with 857 companies for market and regional analysis.",
+    "type.manufacturer":       "Manufacturer",
+    "type.ofenbauer":          "Stove Builder",
+    "type.unknown":            "Unknown",
+    "card.website":            "Website",
+    "card.website.missing":    "No website",
+    "detail.type":             "Type",
+    "detail.products":         "Product Categories",
+    "detail.priority_reason":  "Priority Reason",
+    "detail.strategy":         "Sales Approach",
+    "detail.address":          "Address",
+    "popup.website":           "Open Website",
+    "popup.no_website":        "No website available",
+    "popup.no_email":          "No email available",
+    "popup.no_phone":          "No phone number available",
+    "popup.maps":              "Address in Google Maps",
+    "popup.linkedin_contacts": "LinkedIn Contacts",
+    "location.unknown":        "Location unknown",
+    "legend.title":            "Legend & Priorities",
+    "legend.close":            "Close legend",
+    "legend.rot":              " Red: Manufacturer A / High Fit",
+    "legend.gelb":             " Yellow: Manufacturer B",
+    "legend.grau":             " Grey: Manufacturer C",
+    "legend.blau":             " Blue: Stove Builder high",
+    "legend.hellblau":         " Light Blue: Stove Builder medium",
+    "legend.hellgrau":         " Light Grey: Stove Builder low",
+    "legend.size":             " Marker size: Priority / Relevance",
+    "legend.priority":         " A = strategic, B = relevant, C = monitoring",
+    "legend.compact.rot":      " Manufacturer A / High Fit",
+    "legend.compact.gelb":     " Manufacturer B",
+    "legend.compact.grau":     " Manufacturer C",
+    "legend.compact.blau":     " Stove Builder high",
+    "legend.compact.hellblau": " Stove Builder medium",
+    "legend.compact.hellgrau": " Stove Builder low",
+    "map.kicker":              "Map",
+    "map.title":               "DACH Sales Map",
+    "map.aria":                "Interactive map for DACH manufacturers and stove builders",
+    "card.focus.aria":         "focus on map",
+    "results.meta.all":        "{count} companies in the results list. Click a company to focus its marker on the map.",
+    "results.meta.partial":    "{count} companies in the results list, {mapCount} shown on the map. Click a company with a marker to focus it on the map."
+  }
+};
+
+// ── LinkedIn Contacts ─────────────────────────────────────────────────────────
+const LINKEDIN_CONTACTS = [
+  { company: "AUSTROFLAMM GmbH", contacts: [
+    { name: "Alexander Niedersüß",     role: "Einkäufer",                                url: "https://www.linkedin.com/in/alexander-nieders%C3%BC%C3%9F-61b519205/" },
+    { name: "Ezequiel Prügger",        role: "Purchasing",                               url: "https://www.linkedin.com/in/ezequiel-pr%C3%BCgger-5b33a32a9/" },
+    { name: "Matej Bučinel",           role: "Product Manager",                          url: "https://www.linkedin.com/in/matej-bu%C4%8Dinel-7514559a/" }
+  ]},
+  { company: "HARK GmbH & Co. KG", contacts: [
+    { name: "Waldemar Leib",           role: "Head of Purchasing",                       url: "https://www.linkedin.com/in/waldemar-leib-a4922b9a/" }
+  ]},
+  { company: "LEDA Werk GmbH & Co. KG", contacts: [
+    { name: "Onno Cramer",             role: "Head of Product Development",              url: "https://www.linkedin.com/in/onno-cramer-8bba1410a/" },
+    { name: "Hans-Joachim Blüthmann", role: "Technical Director",                       url: "https://www.linkedin.com/in/hans-joachim-bl%C3%BCthmann-684390348/" },
+    { name: "Marcel Wolter",           role: "R&D",                                      url: "https://www.linkedin.com/in/marcel-wolter-269105186/" }
+  ]},
+  { company: "Lohberger GmbH", contacts: [
+    { name: "Peter Schaller",          role: "Manager Purchasing",                       url: "https://www.linkedin.com/in/peter-schaller-048984142/" },
+    { name: "Nadine Rieger",           role: "Purchasing",                               url: "https://www.linkedin.com/in/nadine-rieger-403851221/" }
+  ]},
+  { company: "Ulrich Brunner GmbH", contacts: [
+    { name: "Renate Stirner",          role: "Technical Purchasing / Asst. Management",  url: "https://www.linkedin.com/in/renate-stirner-b666b118/" },
+    { name: "Richard Pointner",        role: "Development Engineer",                     url: "https://www.linkedin.com/in/richard-pointner-a7517a285/" }
+  ]},
+  { company: "Camina & Schmid", contacts: [
+    { name: "Sven Borgstedt",          role: "Operations (Logistics / Purchase / Prod.)", url: "https://www.linkedin.com/in/sven-borgstedt-7998021a2/" },
+    { name: "Julian Strakerjahn",      role: "Purchasing",                               url: "https://www.linkedin.com/in/julian-strakerjahn-a617373b3/" }
+  ]},
+  { company: "HASE Kaminofenbau GmbH", contacts: [
+    { name: "Florian Fischer",         role: "Head of Production Development",           url: "https://www.linkedin.com/in/florian-fischer-7a7541285/" }
+  ]},
+  { company: "Ortner GmbH", contacts: [
+    { name: "Christian Walter",        role: "Product Manager",                          url: "https://www.linkedin.com/in/christian-walter-37b8a995/" }
+  ]},
+  { company: "Rika Innovative Ofentechnik GmbH", contacts: [
+    { name: "Tomislav Dramac",         role: "Head of Production",                       url: "https://www.linkedin.com/in/tomislav-dramac-594b2929b/" }
+  ]},
+  { company: "Spartherm Feuerungstechnik GmbH", contacts: [
+    { name: "Marc Diekmann",           role: "Contact (existing customer)",              url: "https://www.linkedin.com/in/marc-diekmann-185603395/" }
+  ]},
+  { company: "Tiba AG", contacts: [
+    { name: "Cedric Waldmeier",        role: "Project Manager Heat Systems",             url: "https://www.linkedin.com/in/cedric-waldmeier-046301167/" }
+  ]},
+  { company: "WAMSLER", contacts: [
+    { name: "Zoltán Péter Németh",     role: "CEO",                                      url: "https://www.linkedin.com/in/zolt%C3%A1n-p%C3%A9ter-n%C3%A9meth-40959b84/" }
+  ]},
+  { company: "rondo Ringkachelofen GmbH", contacts: [
+    { name: "Hanspeter Lüdin",         role: "Former Head of Design & Development",      url: "https://www.linkedin.com/in/hanspeter-l%C3%BCdin-4b0a96130/" }
+  ]},
+  { company: "Drooff Kaminöfen GmbH & Co. KG", contacts: [
+    { name: "Till Klask",              role: "Managing Director",                        url: "https://www.linkedin.com/in/till-klask-043b8915b/" }
+  ]},
+  { company: "Wotan Heizeinsätze GmbH", contacts: [
+    { name: "Regina (Gina) Pütz",      role: "Managing Director",                        url: "https://www.linkedin.com/in/regina-gina-p%C3%BCtz-81882a79/" }
+  ]},
+  { company: "AMBIO Speicherofen & Kamin GmbH", contacts: [
+    { name: "Armin Zipka",             role: "CEO",                                      url: "https://www.linkedin.com/in/armin-zipka-47749b33a/" }
+  ]},
+  { company: "Bernhard Kaschütz GmbH", contacts: [
+    { name: "Harald Laber",            role: "Operations Manager",                       url: "https://www.linkedin.com/in/harald-laber-68a97aba/" }
+  ]},
+  { company: "Bullerjan GmbH", contacts: [
+    { name: "Julius Ratjen",           role: "Managing Director",                        url: "https://www.linkedin.com/in/julius-ratjen-82a204/" }
+  ]},
+  { company: "CERA DESIGN by Britta von Tasch GmbH", contacts: [
+    { name: "Britta von Tasch",        role: "CEO",                                      url: "https://www.linkedin.com/in/britta-von-tasch-84187b158/" }
+  ]},
+  { company: "Erwin KOPPE", contacts: [
+    { name: "Veronika Prösl",          role: "Purchasing",                               url: "https://www.linkedin.com/in/veronika-pr%C3%B6sl-4632b4286/" }
+  ]},
+  { company: "HAFNERTEC", contacts: [
+    { name: "Leopold Bicker",          role: "CEO",                                      url: "https://www.linkedin.com/in/leopold-bicker-17a4b7bb/" }
+  ]},
+  { company: "Max Blank GmbH", contacts: [
+    { name: "Thomas Blank",            role: "CEO",                                      url: "https://www.linkedin.com/in/thomas-blank-03784b150/" }
+  ]},
+  { company: "Ofenfabrik Schenk AG", contacts: [
+    { name: "David Broger",            role: "Head of Production & Technics",            url: "https://www.linkedin.com/in/david-broger-23b0ba2/" }
+  ]},
+  { company: "PROMETHEUS Öfen GmbH", contacts: [
+    { name: "Anton Brandauer",         role: "CEO",                                      url: "https://www.linkedin.com/in/anton-brandauer-600a61113/" }
+  ]},
+  { company: "wodtke GmbH", contacts: [
+    { name: "Kristijan Dolibasic",     role: "Purchasing",                               url: "https://www.linkedin.com/in/kristijan-dolibasic-0180b7207/" }
+  ]},
+  { company: "Kloss Wohnherde GmbH", contacts: [
+    { name: "Hans-Peter Hubmann",      role: "Production Manager",                       url: "https://ch.linkedin.com/in/hans-peter-hubmann-a615ba51" }
+  ]},
+  { company: "Hans Greub AG", contacts: [
+    { name: "Oliver Rosin",            role: "Design & Engineering",                     url: "https://ch.linkedin.com/in/oliver-rosin-8202a12a2" }
+  ]}
+];
+
+function normalizeName(s) {
+  return s.toLowerCase()
+    .replace(/\b(gmbh|co\.|co|kg|kgaa|ag|se|gmbh & co\. kg|und|the|haus-|haus)\b/g, "")
+    .replace(/[^a-z0-9äöüß]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getLinkedInContacts(companyName) {
+  const norm = normalizeName(companyName);
+  for (const entry of LINKEDIN_CONTACTS) {
+    const entryNorm = normalizeName(entry.company);
+    if (norm === entryNorm || norm.includes(entryNorm) || entryNorm.includes(norm)) {
+      return entry.contacts;
+    }
+  }
+  return [];
+}
+
+function t(key) {
+  return (TRANSLATIONS[_lang] || TRANSLATIONS.de)[key] || key;
+}
+
+let _lang = "de";
+
+function applyLanguage(lang) {
+  _lang = lang;
+  document.getElementById("htmlRoot").lang = lang;
+  document.title = t("page.title");
+
+  // Update lang button — shows the OTHER language as the click target
+  const btn = document.getElementById("langButton");
+  if (btn) btn.textContent = lang === "de" ? "EN" : "DE";
+
+  // Static elements with data-i18n (textContent)
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+
+  // Aria-label attributes
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    el.setAttribute("aria-label", t(el.dataset.i18nAria));
+  });
+
+  // Placeholder attributes
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+
+  // Select option text
+  document.querySelectorAll("[data-i18n-option]").forEach((el) => {
+    el.textContent = t(el.dataset.i18nOption);
+  });
+
+  // Re-render live content if data is loaded
+  if (state && state.companies && state.companies.length > 0) {
+    populateCountryFilter(state.companies);
+    updateLayerUi(state.activeLayer, false);
+    const mapCount = state.filteredCompanies.filter((c) => c._hasCoordinates).length;
+    renderResults(state.filteredCompanies, mapCount);
+    renderStats(state.filteredCompanies.filter((c) => c._hasCoordinates));
+    // Re-render open popups
+    state.clusterGroup?.eachLayer((marker) => {
+      if (marker.isPopupOpen && marker.isPopupOpen()) {
+        const company = [...state.markerIndex.entries()]
+          .find(([, m]) => m === marker)?.[1];
+        if (company) marker.setPopupContent(createPopupMarkup(company));
+      }
+    });
+  }
+}
+
+const DEFAULT_VIEW = {
   center: [50.8, 10.3],
   zoom: 6
 };
@@ -66,6 +386,7 @@ const elements = {
   layerButtons: Array.from(document.querySelectorAll("[data-layer]")),
   layerSwitchWrap: document.getElementById("layerSwitchWrap"),
   layerTooltip: document.getElementById("layerTooltip"),
+  langButton: document.getElementById("langButton"),
   infoButton: document.getElementById("infoButton"),
   legendModal: document.getElementById("legendModal"),
   legendCloseButton: document.getElementById("legendCloseButton"),
@@ -135,6 +456,7 @@ function bindEvents() {
 
   elements.resetFiltersButton.addEventListener("click", () => resetFilters({ keepLayer: true }));
   elements.fitBoundsButton.addEventListener("click", () => fitToCurrentMarkers());
+  elements.langButton?.addEventListener("click", () => applyLanguage(_lang === "de" ? "en" : "de"));
   elements.resultsList?.addEventListener("click", handleResultsListClick);
   elements.resultsList?.addEventListener("keydown", handleResultsListKeydown);
 
@@ -230,7 +552,7 @@ async function loadLayer(layerKey, { fitToBounds = false } = {}) {
   }
 
   updateLayerUi(layerKey, true);
-  elements.resultMeta.textContent = "Layer wird geladen ...";
+  elements.resultMeta.textContent = t("results.layerloading");
 
   try {
     if (!state.datasets.has(layerKey)) {
@@ -255,11 +577,9 @@ async function loadLayer(layerKey, { fitToBounds = false } = {}) {
   } catch (error) {
     console.error("Fehler beim Laden des Layers:", error);
     updateLayerUi(layerKey, false);
-    elements.resultCount.textContent = "Datenfehler";
-    elements.resultMeta.textContent = "Die Layer-Datei konnte nicht geladen werden.";
-    elements.resultsList.innerHTML = renderEmptyState(
-      "Bitte prüfe, ob die JSON-Datei für den gewählten Layer im data-Ordner vorhanden ist."
-    );
+    elements.resultCount.textContent = t("results.error.count");
+    elements.resultMeta.textContent = t("results.error.msg");
+    elements.resultsList.innerHTML = renderEmptyState(t("results.error.hint"));
   }
 }
 
@@ -274,7 +594,7 @@ function updateLayerUi(layerKey, isLoading) {
     button.disabled = isLoading;
   });
 
-  elements.badgeLayerName.textContent = layer.label;
+  elements.badgeLayerName.textContent = t("layer." + layerKey);
 }
 
 function openLegendModal() {
@@ -322,7 +642,7 @@ function populateCountryFilter(companies) {
   const countries = [...new Set(companies.map((company) => company.country).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, "de"));
 
-  elements.countryFilter.innerHTML = '<option value="">Alle Länder</option>';
+  elements.countryFilter.innerHTML = `<option value="">${t("filter.allcountries")}</option>`;
   countries.forEach((country) => {
     const option = document.createElement("option");
     option.value = country;
@@ -469,19 +789,23 @@ function renderMarkers(companies) {
       maxWidth: 360
     });
 
+    const mLiContacts = getLinkedInContacts(company.name);
+    if (mLiContacts.length > 0 && !usesTapTooltipMode()) {
+      const names = mLiContacts.map(c => `<span class="mtt-name">${escapeHtml(c.name)}</span>`).join("");
+      marker.bindTooltip(`<div class="mtt"><strong>${escapeHtml(company.name)}</strong><div class="mtt__contacts"><svg viewBox="0 0 16 16" fill="#0a66c2" width="11" height="11"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg> ${names}</div></div>`, { direction: "top", className: "li-map-tooltip", sticky: false });
+    }
+
     state.markerIndex.set(company._id, marker);
     state.clusterGroup.addLayer(marker);
   });
 }
 
 function renderResults(companies, mapCompanyCount = companies.length) {
-  elements.resultCount.textContent = `${state.filteredCompanies.length} Treffer`;
+  elements.resultCount.textContent = `${state.filteredCompanies.length} ${t("results.kicker")}`;
   elements.resultMeta.textContent = buildResultMetaText(companies.length, mapCompanyCount);
 
   if (companies.length === 0) {
-    elements.resultsList.innerHTML = renderEmptyState(
-      "Keine Karten-Treffer für die aktuelle Kombination aus Layer, Filtern und Suche."
-    );
+    elements.resultsList.innerHTML = renderEmptyState(t("results.empty"));
     return;
   }
 
@@ -491,15 +815,22 @@ function renderResults(companies, mapCompanyCount = companies.length) {
 
 function renderResultCard(company) {
   const mapsLink = buildGoogleMapsLink(company);
-  const websiteLabel = company.website ? "Website" : "Website fehlt";
   const websiteMarkup = company.website
-    ? `<a class="company-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">Website</a>`
-    : `<span class="company-card__link company-card__link--muted">${websiteLabel}</span>`;
+    ? `<a class="company-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">${t("card.website")}</a>`
+    : `<span class="company-card__link company-card__link--muted">${t("card.website.missing")}</span>`;
   const companyName = company.name || company.company_name || "Unbekannte Firma";
   const canFocusMarker = hasValidMapCoordinates(company.lat, company.lng);
   const interactiveAttributes = canFocusMarker
-    ? `data-company-id="${company._id}" tabindex="0" role="button" aria-label="${escapeAttribute(`${companyName} auf der Karte fokussieren`)}"`
+    ? `data-company-id="${company._id}" tabindex="0" role="button" aria-label="${escapeAttribute(`${companyName} ${t("card.focus.aria")}`)}"`
     : `tabindex="-1" aria-disabled="true"`;
+
+  const cardLiContacts = getLinkedInContacts(company.name);
+  const liBadge = cardLiContacts.length > 0
+    ? `<button class="company-card__li-btn" title="${cardLiContacts.length} LinkedIn contact${cardLiContacts.length > 1 ? "s" : ""}: ${escapeAttribute(cardLiContacts.map(c => c.name).join(", "))}" aria-label="LinkedIn contacts">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>
+        <span>${cardLiContacts.length}</span>
+      </button>`r
+    : "";
 
   return `
     <article class="company-card ${getCompanyCardClass(company)} ${canFocusMarker ? "" : "company-card--no-marker"}" ${interactiveAttributes}>
@@ -510,6 +841,7 @@ function renderResultCard(company) {
             <div class="company-card__meta">${escapeHtml(formatLocation(company))}</div>
             ${getAddressLabel(company) ? `<div class="company-card__address">${escapeHtml(getAddressLabel(company))}</div>` : ""}
           </div>
+          ${liBadge}
         </div>
         <div class="detail-list detail-list--card">
           ${buildCompanyDetailBlocks(company)}
@@ -560,7 +892,7 @@ function renderStats(companiesOnMap) {
   elements.statFiltered.textContent = String(state.filteredCompanies.length);
   elements.statManufacturers.textContent = String(manufacturers);
   elements.statOfenbauer.textContent = String(ofenbauer);
-  elements.badgeLayerName.textContent = layer.label;
+  elements.badgeLayerName.textContent = t("layer." + state.activeLayer);
 }
 
 function usesTapTooltipMode() {
@@ -577,7 +909,7 @@ function showLayerTooltip(button) {
     return;
   }
 
-  tooltip.textContent = layer.tooltip;
+  tooltip.textContent = t("layer." + layerKey + ".tooltip");
   tooltip.classList.add("is-visible");
   tooltip.setAttribute("aria-hidden", "false");
   state.activeTooltipLayer = layerKey;
@@ -699,10 +1031,11 @@ function createMarkerIcon(company) {
 
   const markerSize = sizeMap[sizeKey] ?? sizeMap.mittel;
   const opacity = Number(markerPresentation.opacity) || 1;
+  const hasDot = getLinkedInContacts(company.name).length > 0;
 
   return L.divIcon({
     className: "sales-marker-wrapper",
-    html: `<span class="sales-marker sales-marker--${escapeAttribute(markerPresentation.color)} sales-marker--${markerSize.css}" style="opacity:${opacity}"></span>`,
+    html: `<span class="sales-marker sales-marker--${escapeAttribute(markerPresentation.color)} sales-marker--${markerSize.css}" style="opacity:${opacity}"></span>${hasDot ? '<span class="li-dot"></span>' : ""}` ,
     iconSize: [markerSize.pixels, markerSize.pixels],
     iconAnchor: [markerSize.pixels / 2, markerSize.pixels / 2],
     popupAnchor: [0, -markerSize.pixels / 2]
@@ -762,17 +1095,29 @@ function resolveMarkerPresentation(company) {
 
 function createPopupMarkup(company) {
   const websiteLink = company.website
-    ? `<a class="popup-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">Website öffnen</a>`
-    : `<span class="popup-card__meta">Website nicht hinterlegt</span>`;
+    ? `<a class="popup-card__link" href="${escapeAttribute(company.website)}" target="_blank" rel="noreferrer">${t("popup.website")}</a>`
+    : `<span class="popup-card__meta">${t("popup.no_website")}</span>`;
   const emailLink = company.email
     ? `<a class="popup-card__link" href="mailto:${escapeAttribute(company.email)}">${escapeHtml(company.email)}</a>`
-    : `<span class="popup-card__meta">Keine E-Mail hinterlegt</span>`;
+    : `<span class="popup-card__meta">${t("popup.no_email")}</span>`;
   const phoneLink = company.phone
     ? `<a class="popup-card__link" href="tel:${escapeAttribute(company.phone)}">${escapeHtml(company.phone)}</a>`
-    : `<span class="popup-card__meta">Keine Telefonnummer hinterlegt</span>`;
+    : `<span class="popup-card__meta">${t("popup.no_phone")}</span>`;
   const mapsLink = buildGoogleMapsLink(company);
   const mapsAction = mapsLink
-    ? `<a class="popup-card__link" href="${escapeAttribute(mapsLink)}" target="_blank" rel="noreferrer">Adresse in Google Maps</a>`
+    ? `<a class="popup-card__link" href="${escapeAttribute(mapsLink)}" target="_blank" rel="noreferrer">${t("popup.maps")}</a>`
+    : "";
+
+  const liContacts = getLinkedInContacts(company.name);
+  const linkedInBlock = liContacts.length > 0
+    ? `<div class="popup-card__linkedin">
+        <span class="popup-card__linkedin-label">${t("popup.linkedin_contacts")}</span>
+        ${liContacts.map(c => `
+          <a class="popup-card__link popup-card__link--li" href="${escapeAttribute(c.url.trim())}" target="_blank" rel="noreferrer">
+            <svg class="li-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M0 1.146C0 .514.514 0 1.146 0h13.708C15.486 0 16 .514 16 1.146v13.708c0 .632-.514 1.146-1.146 1.146H1.146C.514 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>
+            <span class="li-name">${escapeHtml(c.name)}</span><span class="li-role"> · ${escapeHtml(c.role)}</span>
+          </a>`).join("")}
+      </div>`
     : "";
 
   return `
@@ -791,6 +1136,7 @@ function createPopupMarkup(company) {
         ${phoneLink}
         ${mapsAction}
       </div>
+      ${linkedInBlock}
     </article>
   `;
 }
@@ -807,10 +1153,10 @@ function renderPopupRow(label, value) {
 function buildCompanyDetailBlocks(company) {
   const rows = [];
 
-  rows.push(renderDetailIfValue("Typ", formatTypeLabel(company.company_type)));
-  rows.push(renderDetailIfValue("Produktkategorien", company.product_categories));
-  rows.push(renderDetailIfValue("Prioritätsgrund", company.priority_reason));
-  rows.push(renderDetailIfValue("Vertriebsansatz", company.strategy));
+  rows.push(renderDetailIfValue(t("detail.type"), formatTypeLabel(company.company_type)));
+  rows.push(renderDetailIfValue(t("detail.products"), company.product_categories));
+  rows.push(renderDetailIfValue(t("detail.priority_reason"), company.priority_reason));
+  rows.push(renderDetailIfValue(t("detail.strategy"), company.strategy));
 
   return rows.filter(Boolean).join("");
 }
@@ -818,10 +1164,10 @@ function buildCompanyDetailBlocks(company) {
 function buildPopupDetailBlocks(company) {
   const rows = [];
 
-  rows.push(renderDetailIfValue("Adresse", getAddressLabel(company)));
-  rows.push(renderDetailIfValue("Produktkategorien", company.product_categories));
-  rows.push(renderDetailIfValue("Prioritätsgrund", company.priority_reason));
-  rows.push(renderDetailIfValue("Vertriebsansatz", company.strategy));
+  rows.push(renderDetailIfValue(t("detail.address"), getAddressLabel(company)));
+  rows.push(renderDetailIfValue(t("detail.products"), company.product_categories));
+  rows.push(renderDetailIfValue(t("detail.priority_reason"), company.priority_reason));
+  rows.push(renderDetailIfValue(t("detail.strategy"), company.strategy));
 
   return rows.filter(Boolean).join("");
 }
@@ -854,22 +1200,24 @@ function getCompanyCardClass(company) {
 
 function buildResultMetaText(listCount, mapCount) {
   if (listCount === 0) {
-    return "Keine Firmen in der Trefferliste.";
+    return t("results.none");
   }
 
   if (listCount === mapCount) {
-    return `${listCount} Firmen in der Trefferliste. Klick auf eine Firma fokussiert direkt den Marker.`;
+    return t("results.meta.all").replace("{count}", listCount);
   }
 
-  return `${listCount} Firmen in der Trefferliste, ${mapCount} davon in der Kartenansicht. Klick auf eine Firma mit Marker fokussiert direkt den Karteneintrag.`;
+  return t("results.meta.partial")
+    .replace("{count}", listCount)
+    .replace("{mapCount}", mapCount);
 }
 
 function formatTypeLabel(type) {
-  return type === "manufacturer" ? "Hersteller" : type === "ofenbauer" ? "Ofenbauer" : "Unklar";
+  return type === "manufacturer" ? t("type.manufacturer") : type === "ofenbauer" ? t("type.ofenbauer") : t("type.unknown");
 }
 
 function formatLocation(company) {
-  const city = company.city || "Ort offen";
+  const city = company.city || t("location.unknown");
   const country = formatCountryShort(company.country);
   return country ? `${city}, ${country}` : city;
 }

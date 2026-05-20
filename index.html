@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" id="htmlRoot">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DACH Ofenmarkt Sales Map</title>
+  <title data-i18n="page.title">DACH Ofenmarkt Sales Map</title>
   <meta
     name="description"
     content="Interaktive Sales Map für Hersteller, Ofenbauer und Vertriebsprioritäten im DACH-Ofenmarkt."
@@ -30,37 +30,46 @@
     <header class="topbar">
       <div class="topbar__brand">
         <span class="topbar__badge">Skamol DACH</span>
-        <a class="topbar__title" href="#top">DACH Ofenmarkt Sales Map</a>
+        <a class="topbar__title" href="#top" data-i18n="page.title">DACH Ofenmarkt Sales Map</a>
       </div>
 
       <div class="topbar__actions">
         <div class="topbar__summary" aria-label="KPI-Zeile">
           <span class="topbar__summary-item">
-            <span class="topbar__summary-label">Layer:</span>
+            <span class="topbar__summary-label" data-i18n="topbar.layer">Layer:</span>
             <strong class="topbar__summary-value" id="badgeLayerName">Top Targets</strong>
           </span>
           <span class="topbar__separator">|</span>
           <span class="topbar__summary-item">
             <strong class="topbar__summary-value" id="statFiltered">0</strong>
-            <span class="topbar__summary-label">Firmen</span>
+            <span class="topbar__summary-label" data-i18n="topbar.companies">Firmen</span>
           </span>
           <span class="topbar__separator">|</span>
           <span class="topbar__summary-item">
             <strong class="topbar__summary-value" id="statManufacturers">0</strong>
-            <span class="topbar__summary-label">Hersteller</span>
+            <span class="topbar__summary-label" data-i18n="topbar.manufacturers">Hersteller</span>
           </span>
           <span class="topbar__separator">|</span>
           <span class="topbar__summary-item">
             <strong class="topbar__summary-value" id="statOfenbauer">0</strong>
-            <span class="topbar__summary-label">Ofenbauer</span>
+            <span class="topbar__summary-label" data-i18n="topbar.ofenbauer">Ofenbauer</span>
           </span>
         </div>
+
+        <button
+          class="lang-button"
+          id="langButton"
+          type="button"
+          aria-label="Switch language"
+          title="Switch language / Sprache wechseln"
+        >EN</button>
 
         <button
           class="info-button"
           id="infoButton"
           type="button"
           aria-label="Info öffnen"
+          data-i18n-aria="topbar.info.aria"
           aria-haspopup="dialog"
           aria-controls="legendModal"
           aria-expanded="false"
@@ -79,25 +88,26 @@
       ></button>
       <aside class="legend-modal__panel" role="dialog" aria-modal="true" aria-labelledby="legendTitle">
         <div class="legend-modal__head">
-          <h2 id="legendTitle">Legende &amp; Prioritäten</h2>
+          <h2 id="legendTitle" data-i18n="legend.title">Legende &amp; Prioritäten</h2>
           <button
             class="legend-modal__close"
             id="legendCloseButton"
             type="button"
             aria-label="Legende schließen"
+            data-i18n-aria="legend.close"
           >
             ×
           </button>
         </div>
         <ul class="legend-modal__list">
-          <li><span class="legend-dot legend-dot--rot"></span> Rot: Hersteller A / High Fit</li>
-          <li><span class="legend-dot legend-dot--gelb"></span> Gelb: Hersteller B</li>
-          <li><span class="legend-dot legend-dot--grau"></span> Grau: Hersteller C</li>
-          <li><span class="legend-dot legend-dot--blau"></span> Blau: Ofenbauer high</li>
-          <li><span class="legend-dot legend-dot--hellblau"></span> Hellblau: Ofenbauer medium</li>
-          <li><span class="legend-dot legend-dot--hellgrau"></span> Hellgrau: Ofenbauer low</li>
-          <li><span class="legend-dot legend-dot--outline"></span> Markergröße: Priorität / Relevanz</li>
-          <li><span class="legend-dot legend-dot--outline"></span> A = strategisch, B = relevant, C = Beobachtung</li>
+          <li><span class="legend-dot legend-dot--rot"></span><span data-i18n="legend.rot"> Rot: Hersteller A / High Fit</span></li>
+          <li><span class="legend-dot legend-dot--gelb"></span><span data-i18n="legend.gelb"> Gelb: Hersteller B</span></li>
+          <li><span class="legend-dot legend-dot--grau"></span><span data-i18n="legend.grau"> Grau: Hersteller C</span></li>
+          <li><span class="legend-dot legend-dot--blau"></span><span data-i18n="legend.blau"> Blau: Ofenbauer high</span></li>
+          <li><span class="legend-dot legend-dot--hellblau"></span><span data-i18n="legend.hellblau"> Hellblau: Ofenbauer medium</span></li>
+          <li><span class="legend-dot legend-dot--hellgrau"></span><span data-i18n="legend.hellgrau"> Hellgrau: Ofenbauer low</span></li>
+          <li><span class="legend-dot legend-dot--outline"></span><span data-i18n="legend.size"> Markergröße: Priorität / Relevanz</span></li>
+          <li><span class="legend-dot legend-dot--outline"></span><span data-i18n="legend.priority"> A = strategisch, B = relevant, C = Beobachtung</span></li>
         </ul>
       </aside>
     </div>
@@ -106,18 +116,18 @@
       <section class="controls-panel" id="filtersPanel" aria-label="Filter und Suchlogik">
         <div class="controls-panel__head">
           <div>
-            <h2>Filter</h2>
+            <h2 data-i18n="filter.title">Filter</h2>
           </div>
         </div>
 
         <div class="filter-strip">
           <section class="filter-unit filter-unit--layer">
-            <label class="control-label control-label--compact">Layer</label>
+            <label class="control-label control-label--compact" data-i18n="filter.layer">Layer</label>
             <div class="layer-switch-wrap" id="layerSwitchWrap">
               <div class="layer-switch" role="group" aria-label="Datenebene umschalten">
-                <button class="layer-button is-active" data-layer="top" type="button">Top Targets</button>
-                <button class="layer-button" data-layer="filtered" type="button">Relevante Betriebe</button>
-                <button class="layer-button" data-layer="full" type="button">Full Market</button>
+                <button class="layer-button is-active" data-layer="top" type="button" data-i18n="layer.top">Top Targets</button>
+                <button class="layer-button" data-layer="filtered" type="button" data-i18n="layer.filtered">Relevante Betriebe</button>
+                <button class="layer-button" data-layer="full" type="button" data-i18n="layer.full">Full Market</button>
               </div>
               <div class="layer-tooltip" id="layerTooltip" role="tooltip" aria-hidden="true"></div>
             </div>
@@ -125,29 +135,29 @@
 
           <section class="filter-unit">
             <label class="control control--compact" for="companyTypeFilter">
-              <span class="control-label control-label--compact">Typ</span>
+              <span class="control-label control-label--compact" data-i18n="filter.type">Typ</span>
               <select id="companyTypeFilter">
-                <option value="">Alle</option>
-                <option value="manufacturer">Hersteller</option>
-                <option value="ofenbauer">Ofenbauer</option>
+                <option value="" data-i18n-option="filter.all">Alle</option>
+                <option value="manufacturer" data-i18n-option="type.manufacturer">Hersteller</option>
+                <option value="ofenbauer" data-i18n-option="type.ofenbauer">Ofenbauer</option>
               </select>
             </label>
           </section>
 
           <section class="filter-unit">
             <label class="control control--compact" for="countryFilter">
-              <span class="control-label control-label--compact">Land</span>
+              <span class="control-label control-label--compact" data-i18n="filter.country">Land</span>
               <select id="countryFilter">
-                <option value="">Alle Länder</option>
+                <option value="" data-i18n-option="filter.allcountries">Alle Länder</option>
               </select>
             </label>
           </section>
 
           <section class="filter-unit">
             <label class="control control--compact" for="salesPriorityFilter">
-              <span class="control-label control-label--compact">Priorität</span>
+              <span class="control-label control-label--compact" data-i18n="filter.priority">Priorität</span>
               <select id="salesPriorityFilter">
-                <option value="">Alle</option>
+                <option value="" data-i18n-option="filter.all">Alle</option>
                 <option value="A">A</option>
                 <option value="B">B</option>
                 <option value="C">C</option>
@@ -157,27 +167,28 @@
 
           <section class="filter-unit">
             <label class="control control--compact" for="topTargetFilter">
-              <span class="control-label control-label--compact">Top Target</span>
+              <span class="control-label control-label--compact" data-i18n="filter.toptarget">Top Target</span>
               <select id="topTargetFilter">
-                <option value="">Alle</option>
-                <option value="true">Ja</option>
-                <option value="false">Nein</option>
+                <option value="" data-i18n-option="filter.all">Alle</option>
+                <option value="true" data-i18n-option="filter.yes">Ja</option>
+                <option value="false" data-i18n-option="filter.no">Nein</option>
               </select>
             </label>
           </section>
 
           <section class="filter-unit filter-unit--search">
             <label class="control control--compact control--search" for="searchInput">
-              <span class="control-label control-label--compact">Suche</span>
+              <span class="control-label control-label--compact" data-i18n="filter.search">Suche</span>
               <input
                 id="searchInput"
                 type="search"
                 placeholder="z. B. Spartherm, Hamburg, Kamineinsätze"
+                data-i18n-placeholder="filter.search.placeholder"
               >
             </label>
             <div class="action-row action-row--compact">
-              <button id="fitBoundsButton" class="button button--primary" type="button">Treffer auf Karte</button>
-              <button id="resetFiltersButton" class="button button--secondary" type="button">Filter zurücksetzen</button>
+              <button id="fitBoundsButton" class="button button--primary" type="button" data-i18n="btn.fitbounds">Treffer auf Karte</button>
+              <button id="resetFiltersButton" class="button button--secondary" type="button" data-i18n="btn.reset">Filter zurücksetzen</button>
             </div>
           </section>
         </div>
@@ -188,12 +199,12 @@
           <section class="panel panel--results">
             <div class="panel__head">
               <div>
-                <p class="section-kicker">Treffer</p>
-                <h2>Trefferliste</h2>
+                <p class="section-kicker" data-i18n="results.kicker">Treffer</p>
+                <h2 data-i18n="results.title">Trefferliste</h2>
               </div>
               <div class="panel__badge" id="resultCount">0 Treffer</div>
             </div>
-            <p class="panel__text" id="resultMeta">Lade Daten …</p>
+            <p class="panel__text" id="resultMeta" data-i18n="results.loading">Lade Daten …</p>
             <div class="list-block" id="resultsList" aria-live="polite"></div>
           </section>
         </aside>
@@ -201,22 +212,22 @@
         <section class="map-panel" id="marketMap">
           <div class="map-panel__head">
             <div>
-              <p class="section-kicker">Karte</p>
-              <h2>DACH Sales Map</h2>
+              <p class="section-kicker" data-i18n="map.kicker">Karte</p>
+              <h2 data-i18n="map.title">DACH Sales Map</h2>
             </div>
           </div>
           <div class="map-canvas-wrap">
             <div class="map-legend-compact" aria-label="Kompakte Markerlegende">
               <ul>
-                <li><span class="legend-dot legend-dot--rot"></span> Hersteller A / High Fit</li>
-                <li><span class="legend-dot legend-dot--gelb"></span> Hersteller B</li>
-                <li><span class="legend-dot legend-dot--grau"></span> Hersteller C</li>
-                <li><span class="legend-dot legend-dot--blau"></span> Ofenbauer high</li>
-                <li><span class="legend-dot legend-dot--hellblau"></span> Ofenbauer medium</li>
-                <li><span class="legend-dot legend-dot--hellgrau"></span> Ofenbauer low</li>
+                <li><span class="legend-dot legend-dot--rot"></span><span data-i18n="legend.compact.rot"> Hersteller A / High Fit</span></li>
+                <li><span class="legend-dot legend-dot--gelb"></span><span data-i18n="legend.compact.gelb"> Hersteller B</span></li>
+                <li><span class="legend-dot legend-dot--grau"></span><span data-i18n="legend.compact.grau"> Hersteller C</span></li>
+                <li><span class="legend-dot legend-dot--blau"></span><span data-i18n="legend.compact.blau"> Ofenbauer high</span></li>
+                <li><span class="legend-dot legend-dot--hellblau"></span><span data-i18n="legend.compact.hellblau"> Ofenbauer medium</span></li>
+                <li><span class="legend-dot legend-dot--hellgrau"></span><span data-i18n="legend.compact.hellgrau"> Ofenbauer low</span></li>
               </ul>
             </div>
-            <div id="map" aria-label="Interaktive Karte für DACH-Hersteller und Ofenbauer"></div>
+            <div id="map" aria-label="Interaktive Karte für DACH-Hersteller und Ofenbauer" data-i18n-aria="map.aria"></div>
           </div>
         </section>
       </section>
